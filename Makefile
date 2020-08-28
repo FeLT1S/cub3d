@@ -1,11 +1,12 @@
-SRCS			=	srcs/main.c
-OBJS			= $(SRCS:.c=.o)
-INCS			=	inc/cub3d.h
+SRCS			=	srcs/main.c\
+					srcs/parsing.c
+OBJS			= 	$(SRCS:.c=.o)
+INCS			=	inc
 
 CC				= clang
 RM				= rm -rf
-CFLAGS			= -O3 -Wall -Wextra -Werror -I.
-LIBS			=  -L./srcs/minilibx_opengl -lmlx -framework OpenGL -framework AppKit -lm -L./srcs/libft -lft -g
+CFLAGS			= -O3 -Wall -Wextra -Werror -Iinc -Ilibft/inc
+LIBS			=  -L./minilibx_opengl -lmlx -framework OpenGL -framework AppKit -lm -Llibft -lft -g
 
 NAME			= cub3D
 
@@ -13,10 +14,10 @@ all:			$(NAME)
 
 libft:
 				@echo "MAKING LIBFT"
-				@make -C ./srcs/libft
+				@make -C ./libft
 
 $(NAME):		$(OBJS) libft
-				$(CC) ${CFLAGS} -I $(INCS) -o ${NAME} ${OBJS} ${LIBS}
+				$(CC) ${CFLAGS} -o ${NAME} ${OBJS} ${LIBS}
 
 $(MLX):
 				@$(MAKE)
@@ -30,4 +31,4 @@ fclean:			clean
 
 re:				fclean $(NAME)
 
-.PHONY:			all clean fclean re
+.PHONY:			all clean fclean re libft
