@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/26 17:18:58 by jiandre           #+#    #+#             */
-/*   Updated: 2020/08/27 19:29:47 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/08/31 17:09:37 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int key_event(int keycode, t_fff *mlx)
 	// return(0);
 	if (keycode == 53)
 	{
-		mlx_clear_window(mlx->mlx, mlx->win);
+	mlx_clear_window(mlx->mlx, mlx->win);
 	int width, height;
 	int bpp, size_line, endian;
 	mlx->image = mlx_xpm_file_to_image(mlx->mlx, "kofe.xpm", &width, &height);

@@ -1,5 +1,4 @@
-SRCS			=	srcs/main.c\
-					srcs/parsing.c
+SRCS			=	srcs/dda.c
 OBJS			= 	$(SRCS:.c=.o)
 INCS			=	inc
 

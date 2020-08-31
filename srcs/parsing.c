@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:29:11 by jiandre           #+#    #+#             */
-/*   Updated: 2020/08/28 20:48:29 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/08/31 17:07:57 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,5 @@ char	**ft_parsing(char *file, t_conf conf)
 			ft_flags(spl_line, conf);
 		if (ft_strapi(spl_line[0], map, 2))
 			...
-		
 	}
 }
