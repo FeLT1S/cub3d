@@ -1,10 +1,11 @@
-SRCS			=	srcs/dda.c
+SRCS			=	srcs/main.c\
+					srcs/parsing.c
 OBJS			= 	$(SRCS:.c=.o)
 INCS			=	inc
 
 CC				= clang
 RM				= rm -rf
-CFLAGS			= -O3 -Wall -Wextra -Werror -Iinc -Ilibft/inc
+CFLAGS			= -O3 -Wall -Wextra -Werror -Iinc -Ilibft/inc -g
 LIBS			=  -L./minilibx_opengl -lmlx -framework OpenGL -framework AppKit -lm -Llibft -lft -g
 
 NAME			= cub3D
