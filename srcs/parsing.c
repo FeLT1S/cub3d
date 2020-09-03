@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:29:11 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/01 19:51:00 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/03 20:37:47 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,66 @@ void	ft_flags(char **spl_line, t_conf *conf)
 		conf->ceil_col = ft_colors(ft_split(spl_line[1], ','));
 }
 
+void	check_pos(t_conf *conf, int i, int j)
+{
+	conf->posX = j + 0.5;
+	conf->posY = i + 0.5;
+	if (conf->map[i][j] == 'N')
+	{
+		conf->dirX = 0;
+		conf->dirY = -1;
+		conf->planeX = 1;
+		conf->planeY = 0;
+	}
+	if (conf->map[i][j] == 'S')
+	{
+		conf->dirX = 0;
+		conf->dirY = 1;
+		conf->planeX = -1;
+		conf->planeY = 0;
+	}
+	if (conf->map[i][j] == 'W')
+	{
+		conf->dirX = -1;
+		conf->dirY = 0;
+		conf->planeX = 0;
+		conf->planeY = 1;
+	}
+	if (conf->map[i][j] == 'E')
+	{
+		conf->dirX = 1;
+		conf->dirY = 0;
+		conf->planeX = 0;
+		conf->planeY = -1;
+	}
+	conf->map[i][j] = '0';
+}
+
+int	ft_checkmap(t_conf *conf)
+{
+	int j;
+	int i;
+
+	i = 0;
+	while(conf->map[i])
+	{
+		j = 0;
+		while(conf->map[i][j])
+		{
+			if (conf->map[i][j] != '0' && conf->map[i][j] != '1' && conf->map[i][j] != '2' && conf->map[i][j] != 'N' && conf->map[i][j] != 'S' && conf->map[i][j] != 'W' && conf->map[i][j] != 'E' && conf->map[i][j] != ' ')
+			{
+				write(1, "ERROR -  MAP IS NOT VALID", 26);
+				return (1);
+			}
+			if (conf->map[i][j] == 'N' || conf->map[i][j] == 'S' || conf->map[i][j] == 'W' || conf->map[i][j] == 'E')
+				check_pos(conf, i, j);
+			j++;
+		}
+		i++;
+	}
+	return (0);
+}
+
 void	ft_map(t_list *lst, t_conf *conf)
 {
 	int i;
@@ -71,14 +131,15 @@ void	ft_map(t_list *lst, t_conf *conf)
 	fst_lst = lst;
 	i = 0;
 	num_str = ft_lstsize(lst);
-	conf->map = (char**)malloc(sizeof(int*) * num_str);
+	conf->map = (char**)malloc(sizeof(int*) * (num_str + 1));
 	while (i < num_str)
 	{
 		conf->map[i] = (char*)lst->content;
 		lst = lst->next;
 		i++;
 	}
-	//ft_lstclear(&fst_lst, );
+	conf->map[num_str + 1] = NULL;
+	ft_checkmap(conf);
 }
 
 void	ft_parsing(char *file, t_conf *conf)
