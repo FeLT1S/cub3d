@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/03 20:52:07 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/04 18:09:42 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "cub3d.h"
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // #define screenWidth 1280
 // #define screenHeight 1024
@@ -21,6 +22,13 @@
 #define mapHeight 24
 #define moveSpeed 0.05
 #define rotSpeed 0.03
+#define numSprites 3
+
+typedef struct s_sprite
+{
+  double x;
+  double y;
+}               t_sprite;
 
 typedef struct  s_data {
     void        *img;
@@ -44,15 +52,6 @@ typedef struct  s_game {
   t_conf conf;
 }				t_game;
 
-typedef enum  {
-	W = 13,
-	A = 0,
-	S,
-	D,
-	LEFT  = 123,
-	RIGHT,
-} e_keys;
-
 void            my_mlx_pixel_put(t_data *data, int x, int y, int color)
 {
     char    *dst;
@@ -61,20 +60,65 @@ void            my_mlx_pixel_put(t_data *data, int x, int y, int color)
     *(unsigned int*)dst = color;
 }
 
+void    sortSprites(int *sprite_order, double *spriteDistance, int amount)
+{
+  int buff;
+  int i;
+  int check;
+  
+  i = 0;
+  check = 1;
+  while (check)
+  {
+    while (i < amount - 1)
+    {
+      check = 0;
+      if (spriteDistance[i] < spriteDistance[i + 1])
+      {
+        check = 1;
+        buff = spriteDistance[i];
+        spriteDistance[i] = spriteDistance[i + 1];
+        spriteDistance[i + 1] = buff;
+        buff = sprite_order[i];
+        sprite_order[i] = sprite_order[i + 1];
+        sprite_order[i + 1] = buff;
+      }
+      i++;
+      if (check && i == amount - 1)
+        i = 0;
+    }
+  }
+}
+
+
 void		raycasting(t_game *game)
 {
-  int texWidth[4], texHeight[4]; 
-  void *tex[4];
-  tex[0] = mlx_xpm_file_to_image(game->mlx, game->conf.we_path, &texWidth[0], &texHeight[0]);
-  tex[1] = mlx_xpm_file_to_image(game->mlx, game->conf.ea_path, &texWidth[1], &texHeight[1]);
-  tex[2] = mlx_xpm_file_to_image(game->mlx, game->conf.so_path, &texWidth[2], &texHeight[2]);
-  tex[3] = mlx_xpm_file_to_image(game->mlx, game->conf.no_path, &texWidth[3], &texHeight[3]);
+  t_sprite sprite[3];
+  double ZBuffer[game->conf.width];
+  //arrays used to sort the sprites
+  int spriteOrder[numSprites];
+  double spriteDistance[numSprites];
+  int tex_width[5], tex_height[5]; 
+  void *tex[5];
+  tex[0] = mlx_xpm_file_to_image(game->mlx, game->conf.we_path, &tex_width[0], &tex_height[0]);
+  tex[1] = mlx_xpm_file_to_image(game->mlx, game->conf.ea_path, &tex_width[1], &tex_height[1]);
+  tex[2] = mlx_xpm_file_to_image(game->mlx, game->conf.so_path, &tex_width[2], &tex_height[2]);
+  tex[3] = mlx_xpm_file_to_image(game->mlx, game->conf.no_path, &tex_width[3], &tex_height[3]);
+  tex[4] = mlx_xpm_file_to_image(game->mlx, game->conf.s_path, &tex_width[4], &tex_height[4]);
+  
   int bpp, sline, endian;
-  int *texture[4];
+  int *texture[5];
   texture[0] = (int*)mlx_get_data_addr(tex[0], &bpp, &sline, &endian);
   texture[1] = (int*)mlx_get_data_addr(tex[1], &bpp, &sline, &endian);
   texture[2] = (int*)mlx_get_data_addr(tex[2], &bpp, &sline, &endian);
   texture[3] = (int*)mlx_get_data_addr(tex[3], &bpp, &sline, &endian);
+  texture[4] = (int*)mlx_get_data_addr(tex[4], &bpp, &sline, &endian);
+  sprite[0].x = 27;
+  sprite[0].y = 2;
+  sprite[1].x = 25;
+  sprite[1].y = 2;
+  sprite[2].x = 28;
+  sprite[2].y = 3;
 	for(int x = 0; x < game->conf.width; x++)
     {
       //calculate ray position and direction
@@ -165,21 +209,21 @@ void		raycasting(t_game *game)
       if (side == 0) 
       {
         if (stepX < 0)
-          texX = (int)(wallX * (double)(texWidth[0]));
+          texX = (int)(wallX * (double)(tex_width[0]));
         else
-          texX = (int)(wallX * (double)(texWidth[1]));
+          texX = (int)(wallX * (double)(tex_width[1]));
       }
       else
       {
         if (stepY < 0)
-          texX = (int)(wallX * (double)(texWidth[2]));
+          texX = (int)(wallX * (double)(tex_width[2]));
         else
-          texX = (int)(wallX * (double)(texWidth[3]));
+          texX = (int)(wallX * (double)(tex_width[3]));
       }
-      if(side == 0 && raydirX < 0) texX = texWidth[0] - texX - 1;
-      else if(side == 0 && raydirX > 0) texX = texWidth[1] - texX - 1;
-      else if(side == 1 && rayDirY < 0) texX = texWidth[2] - texX - 1;
-      else if(side == 1 && rayDirY > 0) texX = texWidth[3] - texX - 1;
+      if(side == 0 && raydirX < 0) texX = tex_width[0] - texX - 1;
+      else if(side == 0 && raydirX > 0) texX = tex_width[1] - texX - 1;
+      else if(side == 1 && rayDirY < 0) texX = tex_width[2] - texX - 1;
+      else if(side == 1 && rayDirY > 0) texX = tex_width[3] - texX - 1;
 
       // TODO: an integer-only bresenham or DDA like algorithm could make the texture coordinate stepping faster
       // How much to increase the texture coordinate per screen pixel
@@ -187,16 +231,16 @@ void		raycasting(t_game *game)
       if (side == 0)
       {
         if (stepX < 0)
-          step = 1.0 * texHeight[0] / lineHeight;
+          step = 1.0 * tex_height[0] / lineHeight;
         else
-          step = 1.0 * texHeight[1] / lineHeight;
+          step = 1.0 * tex_height[1] / lineHeight;
       }
       else
       {
         if (stepY < 0)
-          step = 1.0 * texHeight[2] / lineHeight;
+          step = 1.0 * tex_height[2] / lineHeight;
         else
-          step = 1.0 * texHeight[3] / lineHeight;
+          step = 1.0 * tex_height[3] / lineHeight;
       }
 	  for (int y = 0; y < drawStart; y++)
 			my_mlx_pixel_put(&game->data, x, y, game->conf.ceil_col);
@@ -211,14 +255,14 @@ void		raycasting(t_game *game)
         {
           if (stepX < 0)
           {
-            texY = (int)texPos & (texHeight[0] - 1);
-            color = texture[0][texHeight[0] * texY + texX];
+            texY = (int)texPos & (tex_height[0] - 1);
+            color = texture[0][tex_height[0] * texY + texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
           else
           {
-            texY = (int)texPos & (texHeight[1] - 1);
-            color = texture[1][texHeight[1] * texY + texX];
+            texY = (int)texPos & (tex_height[1] - 1);
+            color = texture[1][tex_height[1] * texY + texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
         }
@@ -226,20 +270,79 @@ void		raycasting(t_game *game)
         {
           if (stepY < 0)
           {
-            texY = (int)texPos & (texHeight[2] - 1);
-            color = texture[2][texHeight[2] * texY + texX];
+            texY = (int)texPos & (tex_height[2] - 1);
+            color = texture[2][tex_height[2] * texY + texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
           else
           {
-            texY = (int)texPos & (texHeight[3] - 1);
-            color = texture[3][texHeight[3] * texY + texX];
+            texY = (int)texPos & (tex_height[3] - 1);
+            color = texture[3][tex_height[3] * texY + texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
         }
 		}
 		for (int y = drawEnd; y < game->conf.height; y++)
 			my_mlx_pixel_put(&game->data, x, y, game->conf.floor_col);
+    ZBuffer[x] = perpWallDist; //perpendicular distance is used
+    }
+        //SPRITE CASTING
+    //sort sprites from far to close
+    for(int i = 0; i < numSprites; i++)
+    {
+      spriteOrder[i] = i;
+      spriteDistance[i] = ((game->conf.posX - sprite[i].x) * (game->conf.posX - sprite[i].x) + (game->conf.posY - sprite[i].y) * (game->conf.posY - sprite[i].y)); //sqrt not taken, unneeded
+    }
+    sortSprites(spriteOrder, spriteDistance, numSprites);
+
+    //after sorting the sprites, do the projection and draw them
+    for(int i = 0; i < numSprites; i++)
+    {
+      double spriteX = sprite[spriteOrder[i]].x - game->conf.posX;
+      double spriteY = sprite[spriteOrder[i]].y - game->conf.posY;
+      double invDet = 1.0 / (game->conf.planeX * game->conf.dirY - game->conf.dirX * game->conf.planeY); //required for correct matrix multiplication
+
+      double transformX = invDet * (game->conf.dirY * spriteX - game->conf.dirX * spriteY);
+      double transformY = invDet * (-game->conf.planeY * spriteX + game->conf.planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D
+
+      int spriteScreenX = (int)((game->conf.width / 2) * (1 + transformX / transformY));
+
+      //calculate height of the sprite on screen
+      int spriteHeight = abs((int)(game->conf.height / (transformY))); //using 'transformY' instead of the real distance prevents fisheye
+      //calculate lowest and highest pixel to fill in current stripe
+      int drawStartY = -spriteHeight / 2 + game->conf.height / 2;
+      if(drawStartY < 0) drawStartY = 0;
+      int drawEndY = spriteHeight / 2 + game->conf.height / 2;
+      if(drawEndY >= game->conf.height) drawEndY = game->conf.height - 1;
+
+      //calculate width of the sprite
+      int spriteWidth = abs( (int) (game->conf.height / (transformY)));
+      int drawStartX = -spriteWidth / 2 + spriteScreenX;
+      if(drawStartX < 0) drawStartX = 0;
+      int drawEndX = spriteWidth / 2 + spriteScreenX;
+      if(drawEndX >= game->conf.width) drawEndX = game->conf.width - 1;
+
+      //loop through every vertical stripe of the sprite on screen
+      for(int stripe = drawStartX; stripe < drawEndX; stripe++)
+      {
+        int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * tex_width[4] / spriteWidth) / 256;
+        //the conditions in the if are:
+        //1) it's in front of camera plane so you don't see things behind you
+        //2) it's on the screen (left)
+        //3) it's on the screen (right)
+        //4) ZBuffer, with perpendicular distance
+        if(transformY > 0 && stripe > 0 && stripe < game->conf.width && transformY < ZBuffer[stripe])
+        for(int y = drawStartY; y < drawEndY; y++) //for every pixel of the current stripe
+        {
+          int d = (y) * 256 - game->conf.height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
+          int texY = ((d * tex_height[4]) / spriteHeight) / 256;
+          int color = texture[4][tex_width[4] * texY + texX]; //get current color from the texture
+          // if(color != -16777216)
+          if(color != -0x1000000)
+            my_mlx_pixel_put(&game->data, stripe, y, color);
+        }
+      }
+      
     }
 }
 
@@ -302,35 +405,34 @@ int			draw_frame(t_game *game)
 int key_press(int key, t_game *game)
 {
 	printf("%d\n", key);
-	if (key == W)
+	if (key == kVK_ANSI_W)
 		game->w = 1;
-	if (key == S)
+	if (key == kVK_ANSI_S)
 		game->s = 1;
-	if (key == LEFT)
+	if (key == kVK_LeftArrow)
 		game->left = 1;
-	if (key == RIGHT)
+	if (key == kVK_RightArrow)
 		game->right = 1;
-  if (key == A)
+  if (key == kVK_ANSI_A)
 		game->a = 1;
-  if (key == D)
+  if (key == kVK_ANSI_D)
 		game->d = 1;
-	printf("%d\n", game->right);
 	return (0);
 }
 
 int key_unpress(int key, t_game *game)
 {
-	if (key == W)
+	if (key == kVK_ANSI_W)
 		game->w = 0;
-	if (key == S)
+	if (key == kVK_ANSI_S)
 		game->s = 0;
-	if (key == LEFT)
+	if (key == kVK_LeftArrow)
 		game->left = 0;
-	if (key == RIGHT)
+	if (key == kVK_RightArrow)
 		game->right = 0;
-  if (key == A)
+  if (key == kVK_ANSI_A)
 		game->a = 0;
-  if (key == D)
+  if (key == kVK_ANSI_D)
 		game->d = 0;
 	printf("%d\n", game->right);
 	return (0);
@@ -345,16 +447,15 @@ int main(int argc, char **argv)
 	game.d = 0;
   game.left = 0;
   game.right = 0;
-  if (argc > 2)
+  if (argc != 2)
     return (0);
 	ft_parsing(argv[1], &game.conf);
 	game.mlx = mlx_init();
-	game.win = mlx_new_window(game.mlx, game.conf.width, game.conf.height, "Hello!");
+	game.win = mlx_new_window(game.mlx, game.conf.width, game.conf.height, "Cub3d");
   check_state(&game);
 	game.data.img = mlx_new_image(game.mlx, game.conf.width, game.conf.height);
 	game.data.addr =  mlx_get_data_addr(game.data.img, &game.data.bits_per_pixel, &game.data.line_length, &game.data.endian);
 	raycasting(&game);
-  //mlx_do_sync(game->mlx);
 	mlx_put_image_to_window(game.mlx, game.win, game.data.img, 0, 0);
 	mlx_destroy_image(game.mlx, game.data.img);
 	mlx_loop_hook(game.mlx, draw_frame, &game);
