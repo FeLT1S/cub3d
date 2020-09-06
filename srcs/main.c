@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/04 18:09:42 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/06 19:19:44 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #define screenWidth 1280
-// #define screenHeight 1024
-#define mapWidth 24
-#define mapHeight 24
 #define moveSpeed 0.05
 #define rotSpeed 0.03
-#define numSprites 3
-
-typedef struct s_sprite
-{
-  double x;
-  double y;
-}               t_sprite;
 
 typedef struct  s_data {
     void        *img;
@@ -62,17 +51,17 @@ void            my_mlx_pixel_put(t_data *data, int x, int y, int color)
 
 void    sortSprites(int *sprite_order, double *spriteDistance, int amount)
 {
-  int buff;
+  double buff;
   int i;
   int check;
   
-  i = 0;
   check = 1;
   while (check)
   {
+    i = 0;
+    check = 0;
     while (i < amount - 1)
     {
-      check = 0;
       if (spriteDistance[i] < spriteDistance[i + 1])
       {
         check = 1;
@@ -84,8 +73,6 @@ void    sortSprites(int *sprite_order, double *spriteDistance, int amount)
         sprite_order[i + 1] = buff;
       }
       i++;
-      if (check && i == amount - 1)
-        i = 0;
     }
   }
 }
@@ -93,11 +80,10 @@ void    sortSprites(int *sprite_order, double *spriteDistance, int amount)
 
 void		raycasting(t_game *game)
 {
-  t_sprite sprite[3];
   double ZBuffer[game->conf.width];
   //arrays used to sort the sprites
-  int spriteOrder[numSprites];
-  double spriteDistance[numSprites];
+  int spriteOrder[game->conf.numSprites];
+  double spriteDistance[game->conf.numSprites];
   int tex_width[5], tex_height[5]; 
   void *tex[5];
   tex[0] = mlx_xpm_file_to_image(game->mlx, game->conf.we_path, &tex_width[0], &tex_height[0]);
@@ -113,12 +99,6 @@ void		raycasting(t_game *game)
   texture[2] = (int*)mlx_get_data_addr(tex[2], &bpp, &sline, &endian);
   texture[3] = (int*)mlx_get_data_addr(tex[3], &bpp, &sline, &endian);
   texture[4] = (int*)mlx_get_data_addr(tex[4], &bpp, &sline, &endian);
-  sprite[0].x = 27;
-  sprite[0].y = 2;
-  sprite[1].x = 25;
-  sprite[1].y = 2;
-  sprite[2].x = 28;
-  sprite[2].y = 3;
 	for(int x = 0; x < game->conf.width; x++)
     {
       //calculate ray position and direction
@@ -288,18 +268,21 @@ void		raycasting(t_game *game)
     }
         //SPRITE CASTING
     //sort sprites from far to close
-    for(int i = 0; i < numSprites; i++)
+    for(int i = 0; i < game->conf.numSprites; i++)
     {
       spriteOrder[i] = i;
-      spriteDistance[i] = ((game->conf.posX - sprite[i].x) * (game->conf.posX - sprite[i].x) + (game->conf.posY - sprite[i].y) * (game->conf.posY - sprite[i].y)); //sqrt not taken, unneeded
+      spriteDistance[i] = ((game->conf.posX - game->conf.sprite[i].x) * (game->conf.posX - game->conf.sprite[i].x) + (game->conf.posY - game->conf.sprite[i].y) * (game->conf.posY - game->conf.sprite[i].y)); //sqrt not taken, unneeded
+      printf("sprite %d dist %f\n", i, spriteDistance[i]);
     }
-    sortSprites(spriteOrder, spriteDistance, numSprites);
-
+    
+    sortSprites(spriteOrder, spriteDistance, game->conf.numSprites);
+    for(int i = 0; i < game->conf.numSprites; i++)
+      printf("sort sprite %d dist %f\n", i, spriteDistance[i]);
     //after sorting the sprites, do the projection and draw them
-    for(int i = 0; i < numSprites; i++)
+    for(int i = 0; i < game->conf.numSprites; i++)
     {
-      double spriteX = sprite[spriteOrder[i]].x - game->conf.posX;
-      double spriteY = sprite[spriteOrder[i]].y - game->conf.posY;
+      double spriteX = game->conf.sprite[spriteOrder[i]].x - game->conf.posX;
+      double spriteY = game->conf.sprite[spriteOrder[i]].y - game->conf.posY;
       double invDet = 1.0 / (game->conf.planeX * game->conf.dirY - game->conf.dirX * game->conf.planeY); //required for correct matrix multiplication
 
       double transformX = invDet * (game->conf.dirY * spriteX - game->conf.dirX * spriteY);
@@ -404,7 +387,6 @@ int			draw_frame(t_game *game)
 
 int key_press(int key, t_game *game)
 {
-	printf("%d\n", key);
 	if (key == kVK_ANSI_W)
 		game->w = 1;
 	if (key == kVK_ANSI_S)
@@ -434,7 +416,6 @@ int key_unpress(int key, t_game *game)
 		game->a = 0;
   if (key == kVK_ANSI_D)
 		game->d = 0;
-	printf("%d\n", game->right);
 	return (0);
 }
 
@@ -447,6 +428,7 @@ int main(int argc, char **argv)
 	game.d = 0;
   game.left = 0;
   game.right = 0;
+  game.conf.numSprites = 0;
   if (argc != 2)
     return (0);
 	ft_parsing(argv[1], &game.conf);

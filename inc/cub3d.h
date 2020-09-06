@@ -6,14 +6,22 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:46:09 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/03 19:16:23 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/06 18:45:20 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "mlx.h"
+#include "keys.h"
+#include "libft.h"
 #include <stdio.h>
 
 //"R ", "NO ", "SO ", "WE ", "EA ", "S ", "F ", "C "
+
+typedef struct s_sprite
+{
+  double x;
+  double y;
+}               t_sprite;
 
 typedef struct		s_conf
 {
@@ -33,7 +41,8 @@ typedef struct		s_conf
 	double	dirY;
 	double planeX;
 	double planeY;
-	
+	int		numSprites;
+	t_sprite *sprite;
 }					t_conf;
 
 void		ft_parsing(char *file, t_conf *conf);
