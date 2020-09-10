@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/06 19:19:44 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/10 19:31:07 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ typedef struct  s_data {
 }               t_data;
 
 typedef struct  s_game {
-	void *mlx;
 	void *win; 
 	double cameraX;
 	int w;
@@ -86,11 +85,11 @@ void		raycasting(t_game *game)
   double spriteDistance[game->conf.numSprites];
   int tex_width[5], tex_height[5]; 
   void *tex[5];
-  tex[0] = mlx_xpm_file_to_image(game->mlx, game->conf.we_path, &tex_width[0], &tex_height[0]);
-  tex[1] = mlx_xpm_file_to_image(game->mlx, game->conf.ea_path, &tex_width[1], &tex_height[1]);
-  tex[2] = mlx_xpm_file_to_image(game->mlx, game->conf.so_path, &tex_width[2], &tex_height[2]);
-  tex[3] = mlx_xpm_file_to_image(game->mlx, game->conf.no_path, &tex_width[3], &tex_height[3]);
-  tex[4] = mlx_xpm_file_to_image(game->mlx, game->conf.s_path, &tex_width[4], &tex_height[4]);
+  tex[0] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.we_path, &tex_width[0], &tex_height[0]);
+  tex[1] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.ea_path, &tex_width[1], &tex_height[1]);
+  tex[2] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.no_path, &tex_width[2], &tex_height[2]);
+  tex[3] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.so_path, &tex_width[3], &tex_height[3]);
+  tex[4] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.s_path, &tex_width[4], &tex_height[4]);
   
   int bpp, sline, endian;
   int *texture[5];
@@ -162,27 +161,34 @@ void		raycasting(t_game *game)
           side = 1;
         }
         //Check if ray has hit a wall
-        if(game->conf.map[mapY][mapX] == '1') hit = 1;
+        if(game->conf.map[mapY][mapX] == '1') 
+          hit = 1;
       }
       //Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
-      if(side == 0) perpWallDist = (mapX - game->conf.posX + (1 - stepX) / 2) / raydirX;
-      else          perpWallDist = (mapY - game->conf.posY + (1 - stepY) / 2) / rayDirY;
+      if(side == 0) 
+        perpWallDist = (mapX - game->conf.posX + (1 - stepX) / 2) / raydirX;
+      else
+        perpWallDist = (mapY - game->conf.posY + (1 - stepY) / 2) / rayDirY;
 
       //Calculate height of line to draw on screen
       int lineHeight = (int)(game->conf.height / perpWallDist);
 
       //calculate lowest and highest pixel to fill in current stripe
-      int drawStart = -lineHeight / 2 + game->conf.height / 2;
-      if(drawStart < 0)drawStart = 0;
-      int drawEnd = lineHeight / 2 + game->conf.height / 2;
-      if(drawEnd >= game->conf.height)drawEnd = game->conf.height - 1;
+      int drawStart = (-lineHeight + game->conf.height) / 2;
+      if(drawStart < 0)
+        drawStart = 0;
+      int drawEnd = (lineHeight + game->conf.height) / 2;
+      if(drawEnd >= game->conf.height)
+        drawEnd = game->conf.height - 1;
       //texturing calculations
 
       //calculate value of wallX
       double wallX; //where exactly the wall was hit
-      if(side == 0) wallX = game->conf.posY + perpWallDist * rayDirY;
-      else          wallX = game->conf.posX + perpWallDist * raydirX;
-      wallX -= floor((wallX));
+      if(side == 0) 
+        wallX = game->conf.posY + perpWallDist * rayDirY;
+      else
+        wallX = game->conf.posX + perpWallDist * raydirX;
+      wallX -= (int)wallX;
 
       //x coordinate on the texture
       int texX;
@@ -200,10 +206,14 @@ void		raycasting(t_game *game)
         else
           texX = (int)(wallX * (double)(tex_width[3]));
       }
-      if(side == 0 && raydirX < 0) texX = tex_width[0] - texX - 1;
-      else if(side == 0 && raydirX > 0) texX = tex_width[1] - texX - 1;
-      else if(side == 1 && rayDirY < 0) texX = tex_width[2] - texX - 1;
-      else if(side == 1 && rayDirY > 0) texX = tex_width[3] - texX - 1;
+      if(side == 0 && raydirX < 0) 
+        texX = tex_width[0] - texX - 1;
+      else if(side == 0 && raydirX > 0) 
+        texX = tex_width[1] - texX - 1;
+      else if(side == 1 && rayDirY < 0) 
+        texX = tex_width[2] - texX - 1;
+      else if(side == 1 && rayDirY > 0) 
+        texX = tex_width[3] - texX - 1;
 
       // TODO: an integer-only bresenham or DDA like algorithm could make the texture coordinate stepping faster
       // How much to increase the texture coordinate per screen pixel
@@ -242,7 +252,7 @@ void		raycasting(t_game *game)
           else
           {
             texY = (int)texPos & (tex_height[1] - 1);
-            color = texture[1][tex_height[1] * texY + texX];
+            color = texture[1][tex_height[1] * (texY + 1) - texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
         }
@@ -251,7 +261,7 @@ void		raycasting(t_game *game)
           if (stepY < 0)
           {
             texY = (int)texPos & (tex_height[2] - 1);
-            color = texture[2][tex_height[2] * texY + texX];
+            color = texture[2][tex_height[2] * (texY + 1) - texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
           else
@@ -272,12 +282,10 @@ void		raycasting(t_game *game)
     {
       spriteOrder[i] = i;
       spriteDistance[i] = ((game->conf.posX - game->conf.sprite[i].x) * (game->conf.posX - game->conf.sprite[i].x) + (game->conf.posY - game->conf.sprite[i].y) * (game->conf.posY - game->conf.sprite[i].y)); //sqrt not taken, unneeded
-      printf("sprite %d dist %f\n", i, spriteDistance[i]);
+      
     }
     
     sortSprites(spriteOrder, spriteDistance, game->conf.numSprites);
-    for(int i = 0; i < game->conf.numSprites; i++)
-      printf("sort sprite %d dist %f\n", i, spriteDistance[i]);
     //after sorting the sprites, do the projection and draw them
     for(int i = 0; i < game->conf.numSprites; i++)
     {
@@ -320,7 +328,6 @@ void		raycasting(t_game *game)
           int d = (y) * 256 - game->conf.height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
           int texY = ((d * tex_height[4]) / spriteHeight) / 256;
           int color = texture[4][tex_width[4] * texY + texX]; //get current color from the texture
-          // if(color != -16777216)
           if(color != -0x1000000)
             my_mlx_pixel_put(&game->data, stripe, y, color);
         }
@@ -376,17 +383,19 @@ int			draw_frame(t_game *game)
   if (!(game->w || game->left || game->right || game->a || game->s || game->d))
     return (0);
 	check_state(game);
-	game->data.img = mlx_new_image(game->mlx, game->conf.width, game->conf.height);
+	game->data.img = mlx_new_image(game->conf.mlx, game->conf.width, game->conf.height);
 	game->data.addr =  mlx_get_data_addr(game->data.img, &game->data.bits_per_pixel, &game->data.line_length, &game->data.endian);
 	raycasting(game);
   //mlx_do_sync(game->mlx);
-	mlx_put_image_to_window(game->mlx, game->win, game->data.img, 0, 0);
-	mlx_destroy_image(game->mlx, game->data.img);
+	mlx_put_image_to_window(game->conf.mlx, game->win, game->data.img, 0, 0);
+	mlx_destroy_image(game->conf.mlx, game->data.img);
 	return (0);
 }
 
 int key_press(int key, t_game *game)
 {
+  if (key == 53)
+    exit(0);
 	if (key == kVK_ANSI_W)
 		game->w = 1;
 	if (key == kVK_ANSI_S)
@@ -432,16 +441,16 @@ int main(int argc, char **argv)
   if (argc != 2)
     return (0);
 	ft_parsing(argv[1], &game.conf);
-	game.mlx = mlx_init();
-	game.win = mlx_new_window(game.mlx, game.conf.width, game.conf.height, "Cub3d");
+	game.conf.mlx = mlx_init();
+	game.win = mlx_new_window(game.conf.mlx, game.conf.width, game.conf.height, "Cub3d");
   check_state(&game);
-	game.data.img = mlx_new_image(game.mlx, game.conf.width, game.conf.height);
+	game.data.img = mlx_new_image(game.conf.mlx, game.conf.width, game.conf.height);
 	game.data.addr =  mlx_get_data_addr(game.data.img, &game.data.bits_per_pixel, &game.data.line_length, &game.data.endian);
 	raycasting(&game);
-	mlx_put_image_to_window(game.mlx, game.win, game.data.img, 0, 0);
-	mlx_destroy_image(game.mlx, game.data.img);
-	mlx_loop_hook(game.mlx, draw_frame, &game);
+	mlx_put_image_to_window(game.conf.mlx, game.win, game.data.img, 0, 0);
+	mlx_destroy_image(game.conf.mlx, game.data.img);
+	mlx_loop_hook(game.conf.mlx, draw_frame, &game);
 	mlx_hook(game.win, 2, (1L<<0), key_press, &game);
 	mlx_hook(game.win, 3, (1L<<1), key_unpress, &game);
-	mlx_loop(game.mlx);
+	mlx_loop(game.conf.mlx);
 }
