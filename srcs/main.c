@@ -6,39 +6,16 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/10 19:31:07 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/12 19:22:36 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "mlx.h"
 #include "cub3d.h"
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #define moveSpeed 0.05
 #define rotSpeed 0.03
-
-typedef struct  s_data {
-    void        *img;
-    char        *addr;
-    int         bits_per_pixel;
-    int         line_length;
-    int         endian;
-}               t_data;
-
-typedef struct  s_game {
-	void *win; 
-	double cameraX;
-	int w;
-	int a;
-	int s;
-	int d;
-	int left;
-	int right;
-	t_data data;
-  t_conf conf;
-}				t_game;
 
 void            my_mlx_pixel_put(t_data *data, int x, int y, int color)
 {
@@ -81,8 +58,8 @@ void		raycasting(t_game *game)
 {
   double ZBuffer[game->conf.width];
   //arrays used to sort the sprites
-  int spriteOrder[game->conf.numSprites];
-  double spriteDistance[game->conf.numSprites];
+  int spriteOrder[game->conf.num_sprs];
+  double spriteDistance[game->conf.num_sprs];
   int tex_width[5], tex_height[5]; 
   void *tex[5];
   tex[0] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.we_path, &tex_width[0], &tex_height[0]);
@@ -252,7 +229,7 @@ void		raycasting(t_game *game)
           else
           {
             texY = (int)texPos & (tex_height[1] - 1);
-            color = texture[1][tex_height[1] * (texY + 1) - texX];
+            color = texture[1][tex_height[1] * texY - texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
         }
@@ -261,7 +238,7 @@ void		raycasting(t_game *game)
           if (stepY < 0)
           {
             texY = (int)texPos & (tex_height[2] - 1);
-            color = texture[2][tex_height[2] * (texY + 1) - texX];
+            color = texture[2][tex_height[2] * texY - texX];
             my_mlx_pixel_put(&game->data, x, y, color);
           }
           else
@@ -278,16 +255,16 @@ void		raycasting(t_game *game)
     }
         //SPRITE CASTING
     //sort sprites from far to close
-    for(int i = 0; i < game->conf.numSprites; i++)
+    for(int i = 0; i < game->conf.num_sprs; i++)
     {
       spriteOrder[i] = i;
       spriteDistance[i] = ((game->conf.posX - game->conf.sprite[i].x) * (game->conf.posX - game->conf.sprite[i].x) + (game->conf.posY - game->conf.sprite[i].y) * (game->conf.posY - game->conf.sprite[i].y)); //sqrt not taken, unneeded
       
     }
     
-    sortSprites(spriteOrder, spriteDistance, game->conf.numSprites);
+    sortSprites(spriteOrder, spriteDistance, game->conf.num_sprs);
     //after sorting the sprites, do the projection and draw them
-    for(int i = 0; i < game->conf.numSprites; i++)
+    for(int i = 0; i < game->conf.num_sprs; i++)
     {
       double spriteX = game->conf.sprite[spriteOrder[i]].x - game->conf.posX;
       double spriteY = game->conf.sprite[spriteOrder[i]].y - game->conf.posY;
@@ -437,7 +414,7 @@ int main(int argc, char **argv)
 	game.d = 0;
   game.left = 0;
   game.right = 0;
-  game.conf.numSprites = 0;
+  game.conf.num_sprs = 0;
   if (argc != 2)
     return (0);
 	ft_parsing(argv[1], &game.conf);
