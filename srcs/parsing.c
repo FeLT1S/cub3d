@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:29:11 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/12 20:01:10 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/12 20:13:00 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,12 +301,16 @@ void	ft_parsing(char *file, t_conf *conf)
 			ft_error(conf, lst, line, spl_line);
 		ft_flags(spl_line, line, lst, conf);
 		free(line);
+		line = 0;
 		splitfree(spl_line);
+		spl_line  = 0;
 	}
 	if (!(spl_line = ft_split(line, ' ')))
 		ft_error(conf, lst, line, spl_line);
 	ft_flags(spl_line, line, lst, conf);
 	free(line);
+	line = 0;
 	splitfree(spl_line);
+	spl_line  = 0;
 	ft_map(lst, conf, line, spl_line);
 }
