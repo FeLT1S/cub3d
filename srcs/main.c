@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/12 19:22:36 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/15 21:44:10 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@ void            my_mlx_pixel_put(t_data *data, int x, int y, int color)
 {
     char    *dst;
 
-    dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
+    dst = data->addr + (y * data->l_ln + x * (data->bpp / 8));
     *(unsigned int*)dst = color;
 }
 
-void    sortSprites(int *sprite_order, double *spriteDistance, int amount)
+void    sort(int *sprite_order, double *spriteDistance, int amount)
 {
   double buff;
   int i;
@@ -53,264 +53,298 @@ void    sortSprites(int *sprite_order, double *spriteDistance, int amount)
   }
 }
 
-
-void		raycasting(t_game *game)
+void		rc_init(t_rc *rc, t_conf *conf, int x)
 {
-  double ZBuffer[game->conf.width];
-  //arrays used to sort the sprites
-  int spriteOrder[game->conf.num_sprs];
-  double spriteDistance[game->conf.num_sprs];
-  int tex_width[5], tex_height[5]; 
-  void *tex[5];
-  tex[0] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.we_path, &tex_width[0], &tex_height[0]);
-  tex[1] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.ea_path, &tex_width[1], &tex_height[1]);
-  tex[2] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.no_path, &tex_width[2], &tex_height[2]);
-  tex[3] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.so_path, &tex_width[3], &tex_height[3]);
-  tex[4] = mlx_xpm_file_to_image(game->conf.mlx, game->conf.s_path, &tex_width[4], &tex_height[4]);
-  
-  int bpp, sline, endian;
-  int *texture[5];
-  texture[0] = (int*)mlx_get_data_addr(tex[0], &bpp, &sline, &endian);
-  texture[1] = (int*)mlx_get_data_addr(tex[1], &bpp, &sline, &endian);
-  texture[2] = (int*)mlx_get_data_addr(tex[2], &bpp, &sline, &endian);
-  texture[3] = (int*)mlx_get_data_addr(tex[3], &bpp, &sline, &endian);
-  texture[4] = (int*)mlx_get_data_addr(tex[4], &bpp, &sline, &endian);
-	for(int x = 0; x < game->conf.width; x++)
+	rc->camerax = 2 * x / (double)conf->width - 1;
+    rc->raydirx = conf->dirX + conf->planeX * rc->camerax;
+    rc->raydiry = conf->dirY + conf->planeY * rc->camerax;
+    rc->mapx = (int)conf->posX;
+    rc->mapy = (int)conf->posY;
+    rc->ddistx = fabs(1 / rc->raydirx);
+    rc->ddisty = fabs(1 / rc->raydiry);
+    rc->hit = 0;
+    if (rc->raydirx < 0)
     {
-      //calculate ray position and direction
-      double cameraX = 2 * x / (double)game->conf.width - 1; //x-coordinate in camera space
-      double raydirX = game->conf.dirX + game->conf.planeX * cameraX;
-      double rayDirY = game->conf.dirY + game->conf.planeY * cameraX;
-      //which box of the map we're in
-      int mapX = (int)game->conf.posX;
-      int mapY = (int)game->conf.posY;
-
-      //length of ray from current position to next x or y-side
-      double sideDistX;
-      double sideDistY;
-
-       //length of ray from one x or y-side to next x or y-side
-      double deltaDistX = fabs(1 / raydirX);
-      double deltaDistY = fabs(1 / rayDirY);
-      double perpWallDist;
-
-      //what direction to step in x or y-direction (either +1 or -1)
-      int stepX;
-      int stepY;
-
-      int hit = 0; //was there a wall hit?
-      int side; //was a NS or a EW wall hit?
-      //calculate step and initial sideDist
-      if(raydirX < 0)
-      {
-        stepX = -1;
-        sideDistX = (game->conf.posX - mapX) * deltaDistX;
+      rc->stepx = -1;
+      rc->sidedistx = (conf->posX - rc->mapx) * rc->ddistx;
+    }
+    else
+    {
+		rc->stepx = 1;
+    	rc->sidedistx = (rc->mapx + 1.0 - conf->posX) * rc->ddistx;
       }
-      else
-      {
-        stepX = 1;
-        sideDistX = (mapX + 1.0 - game->conf.posX) * deltaDistX;
-      }
-      if(rayDirY < 0)
-      {
-        stepY = -1;
-        sideDistY = (game->conf.posY - mapY) * deltaDistY;
-      }
-      else
-      {
-        stepY = 1;
-        sideDistY = (mapY + 1.0 - game->conf.posY) * deltaDistY;
-      }
-      //perform DDA
-      while (hit == 0)
-      {
-        //jump to next map square, OR in x-direction, OR in y-direction
-        if(sideDistX < sideDistY)
-        {
-          sideDistX += deltaDistX;
-          mapX += stepX;
-          side = 0;
+	if (rc->raydiry < 0)
+	{
+    	rc->stepy = -1;
+        rc->sidedisty = (conf->posY - rc->mapy) * rc->ddisty;
+    }
+    else
+    {
+    	rc->stepy = 1;
+    	rc->sidedisty = (rc->mapy + 1.0 - conf->posY) * rc->ddisty;
+    }
+}
+
+void		rc_dda(t_rc *rc, t_conf *conf)
+{
+	while (rc->hit == 0)
+    {
+    	if (rc->sidedistx < rc->sidedisty)
+    	{
+        	rc->sidedistx += rc->ddistx;
+        	rc->mapx += rc->stepx;
+        	rc->side = 0;
         }
         else
         {
-          sideDistY += deltaDistY;
-          mapY += stepY;
-          side = 1;
+        	rc->sidedisty += rc->ddisty;
+        	rc->mapy += rc->stepy;
+        	rc->side = 1;
         }
-        //Check if ray has hit a wall
-        if(game->conf.map[mapY][mapX] == '1') 
-          hit = 1;
-      }
-      //Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
-      if(side == 0) 
-        perpWallDist = (mapX - game->conf.posX + (1 - stepX) / 2) / raydirX;
-      else
-        perpWallDist = (mapY - game->conf.posY + (1 - stepY) / 2) / rayDirY;
+        if (conf->map[rc->mapy][rc->mapx] == '1') 
+        	rc->hit = 1;
+    }
+}
 
-      //Calculate height of line to draw on screen
-      int lineHeight = (int)(game->conf.height / perpWallDist);
+void		rc_line(t_rc *rc, t_conf *conf)
+{
+	if(rc->side == 0)
+	{
+		rc->prpwldist = (rc->mapx - conf->posX + (1 - rc->stepx) / 2);
+		rc->prpwldist /= rc->raydirx;
+	}
+    else
+	{
+		rc->prpwldist = (rc->mapy - conf->posY + (1 - rc->stepy) / 2);
+		rc->prpwldist /= rc->raydiry;
+	}
+	rc->linehgt = (int)(conf->height / rc->prpwldist);
+	rc->drwstrt = (-rc->linehgt + conf->height) / 2;
+	if(rc->drwstrt < 0)
+	rc->drwstrt = 0;
+	rc->drwend = (rc->linehgt + conf->height) / 2;
+	if(rc->drwend >= conf->height)
+    	rc->drwend = conf->height - 1;
+}
 
-      //calculate lowest and highest pixel to fill in current stripe
-      int drawStart = (-lineHeight + game->conf.height) / 2;
-      if(drawStart < 0)
-        drawStart = 0;
-      int drawEnd = (lineHeight + game->conf.height) / 2;
-      if(drawEnd >= game->conf.height)
-        drawEnd = game->conf.height - 1;
-      //texturing calculations
+void		rc_texx(t_rc *rc, t_conf *conf, t_tex *tex)
+{
+	if(rc->side == 0) 
+    	rc->wlx = conf->posY + rc->prpwldist * rc->raydiry;
+    else
+	rc->wlx = conf->posX + rc->prpwldist * rc->raydirx;
+	rc->wlx -= (int)rc->wlx;
 
-      //calculate value of wallX
-      double wallX; //where exactly the wall was hit
-      if(side == 0) 
-        wallX = game->conf.posY + perpWallDist * rayDirY;
-      else
-        wallX = game->conf.posX + perpWallDist * raydirX;
-      wallX -= (int)wallX;
-
-      //x coordinate on the texture
-      int texX;
-      if (side == 0) 
+      if (rc->side == 0) 
       {
-        if (stepX < 0)
-          texX = (int)(wallX * (double)(tex_width[0]));
+        if (rc->stepx < 0)
+          rc->texx = (int)(rc->wlx * (double)(tex[0].wdth));
         else
-          texX = (int)(wallX * (double)(tex_width[1]));
-      }
-      else
-      {
-        if (stepY < 0)
-          texX = (int)(wallX * (double)(tex_width[2]));
-        else
-          texX = (int)(wallX * (double)(tex_width[3]));
-      }
-      if(side == 0 && raydirX < 0) 
-        texX = tex_width[0] - texX - 1;
-      else if(side == 0 && raydirX > 0) 
-        texX = tex_width[1] - texX - 1;
-      else if(side == 1 && rayDirY < 0) 
-        texX = tex_width[2] - texX - 1;
-      else if(side == 1 && rayDirY > 0) 
-        texX = tex_width[3] - texX - 1;
-
-      // TODO: an integer-only bresenham or DDA like algorithm could make the texture coordinate stepping faster
-      // How much to increase the texture coordinate per screen pixel
-      double step;
-      if (side == 0)
-      {
-        if (stepX < 0)
-          step = 1.0 * tex_height[0] / lineHeight;
-        else
-          step = 1.0 * tex_height[1] / lineHeight;
+          rc->texx = (int)(rc->wlx * (double)(tex[1].wdth));
       }
       else
       {
-        if (stepY < 0)
-          step = 1.0 * tex_height[2] / lineHeight;
+        if (rc->stepy < 0)
+          rc->texx = (int)(rc->wlx * (double)(tex[2].wdth));
         else
-          step = 1.0 * tex_height[3] / lineHeight;
+          rc->texx = (int)(rc->wlx * (double)(tex[3].wdth));
       }
-	  for (int y = 0; y < drawStart; y++)
-			my_mlx_pixel_put(&game->data, x, y, game->conf.ceil_col);
-    double texPos = (drawStart - game->conf.height / 2 + lineHeight / 2) * step;
-		for (int y = drawStart; y < drawEnd; y++)
+}
+
+void		rc_texstep(t_rc *rc, t_tex *tex)
+{
+	if (rc->side == 0)
+    	{
+        	if (rc->stepx < 0)
+			{
+        		rc->step = 1.0 * tex[0].hght / rc->linehgt;
+				rc->texx = rc->texx;
+			}
+        	else
+        		rc->step = 1.0 * tex[1].hght / rc->linehgt;
+    	}
+		else
+    	{
+        	if (rc->stepy < 0)
+    			rc->step = 1.0 * tex[2].hght / rc->linehgt;
+        	else
+			{
+    			rc->step = 1.0 * tex[3].hght / rc->linehgt;
+				rc->texx = rc->texx;
+			}
+    	}
+}
+void		rc_paint_wall(t_rc *rc, t_conf *conf, t_tex tex, int x, int y)
+{
+	int color;
+	int texY;
+	
+
+    texY = (int)rc->tx_pos & (tex.hght - 1);
+    color = tex.addr[tex.hght * texY + rc->texx];
+    my_mlx_pixel_put(&conf->data, x, y, color);
+}
+
+void		rc_walls(t_rc *rc, t_conf *conf, t_tex *tx, int x)
+{
+		int		y;
+		
+		y = rc->drwstrt;
+		rc[0].tx_pos = (rc->drwstrt - (conf->height + rc->linehgt) / 2) * rc->step;
+		while (y < rc->drwend)
 		{
-        int texY;
-         
-        texPos += step;
-        int color;
-        if (side == 0)
-        {
-          if (stepX < 0)
-          {
-            texY = (int)texPos & (tex_height[0] - 1);
-            color = texture[0][tex_height[0] * texY + texX];
-            my_mlx_pixel_put(&game->data, x, y, color);
-          }
-          else
-          {
-            texY = (int)texPos & (tex_height[1] - 1);
-            color = texture[1][tex_height[1] * texY - texX];
-            my_mlx_pixel_put(&game->data, x, y, color);
-          }
-        }
-        else
-        {
-          if (stepY < 0)
-          {
-            texY = (int)texPos & (tex_height[2] - 1);
-            color = texture[2][tex_height[2] * texY - texX];
-            my_mlx_pixel_put(&game->data, x, y, color);
-          }
-          else
-          {
-            texY = (int)texPos & (tex_height[3] - 1);
-            color = texture[3][tex_height[3] * texY + texX];
-            my_mlx_pixel_put(&game->data, x, y, color);
-          }
-        }
+        	rc->tx_pos += rc->step;
+        	if (rc->side == 0)
+        	{
+          		if (rc->stepx < 0)
+		  			rc_paint_wall(rc, conf, tx[0], x, y);
+          		else
+					rc_paint_wall(rc, conf, tx[1], x, y);
+			}
+        	else
+        	{
+				if (rc->stepy < 0)
+					rc_paint_wall(rc, conf, tx[2], x, y);
+				else
+					rc_paint_wall(rc, conf, tx[3], x, y);
+			}
+			y++;
 		}
-		for (int y = drawEnd; y < game->conf.height; y++)
-			my_mlx_pixel_put(&game->data, x, y, game->conf.floor_col);
-    ZBuffer[x] = perpWallDist; //perpendicular distance is used
-    }
-        //SPRITE CASTING
-    //sort sprites from far to close
-    for(int i = 0; i < game->conf.num_sprs; i++)
+}
+
+void		tex_init(t_tex *tex, t_conf *conf)
+{
+	if (!(tex[0].img = mlx_xpm_file_to_image(conf->mlx, conf->we_path, &tex[0].wdth, &tex[0].hght)))
+		ft_error(conf, 0, 0, 0);
+	if (!(tex[1].img = mlx_xpm_file_to_image(conf->mlx, conf->ea_path, &tex[1].wdth, &tex[1].hght)))
+		ft_error(conf, 0, 0, 0);
+	if (!(tex[2].img = mlx_xpm_file_to_image(conf->mlx, conf->no_path, &tex[2].wdth, &tex[2].hght)))
+		ft_error(conf, 0, 0, 0);
+	if (!(tex[3].img = mlx_xpm_file_to_image(conf->mlx, conf->so_path, &tex[3].wdth, &tex[3].hght)))
+		ft_error(conf, 0, 0, 0);
+	if (!(tex[4].img = mlx_xpm_file_to_image(conf->mlx, conf->s_path, &tex[4].wdth, &tex[4].hght)))
+		ft_error(conf, 0, 0, 0);
+	tex[0].addr = (int*)mlx_get_data_addr(tex[0].img, &tex[0].bpp, &tex[0].l_ln, &tex[0].enan);
+	tex[1].addr = (int*)mlx_get_data_addr(tex[1].img, &tex[1].bpp, &tex[1].l_ln, &tex[1].enan);
+	tex[2].addr = (int*)mlx_get_data_addr(tex[2].img, &tex[2].bpp, &tex[2].l_ln, &tex[2].enan);
+	tex[3].addr = (int*)mlx_get_data_addr(tex[3].img, &tex[3].bpp, &tex[3].l_ln, &tex[3].enan);
+	tex[4].addr = (int*)mlx_get_data_addr(tex[4].img, &tex[4].bpp, &tex[4].l_ln, &tex[4].enan);
+}
+
+void	srt_sprites(t_conf *conf, int *sprt_ord, double *sprt_dst)
+{
+	int i;
+
+	i = 0;
+	while ( i < conf->num_sprs)
+	{
+		sprt_ord[i] = i;
+		sprt_dst[i] = (pow((conf->posX - conf->sprite[i].x), 2) + pow((conf->posY - conf->sprite[i].y), 2));
+		i++;
+	}
+	sort(sprt_ord, sprt_dst, conf->num_sprs);
+}
+
+void	mtrx_trans(t_conf *conf, t_sc *sc, int *sprt_ord, int i)
+{
+	sc->x = conf->sprite[sprt_ord[i]].x - conf->posX;
+	sc->y = conf->sprite[sprt_ord[i]].y - conf->posY;
+	sc->invdet = 1.0 / (conf->planeX * conf->dirY - conf->dirX * conf->planeY);
+	sc->transx = sc->invdet * (conf->dirY * sc->x - conf->dirX * sc->y);
+	sc->transy = sc->invdet * (-conf->planeY * sc->x + conf->planeX * sc->y);
+	sc->screenx= (int)((conf->width / 2) * (1 + sc->transx / sc->transy));
+	sc->hght = abs((int)(conf->height / (sc->transy)));
+}
+
+void	tex_spr(t_conf *conf, t_sc *sc)
+{
+	sc->draw_starty = -sc->hght / 2 + conf->height / 2;
+	if(sc->draw_starty < 0) 
+		sc->draw_starty = 0;
+	sc->draw_endy = sc->hght / 2 + conf->height / 2;
+	if(sc->draw_endy >= conf->height) 
+		sc->draw_endy = conf->height - 1;
+	sc->wdth = abs((int)(conf->height / sc->transy));
+	sc->draw_startx = -sc->wdth / 2 + sc->screenx;
+	if (sc->draw_startx < 0) 
+		sc->draw_startx = 0;
+	sc->draw_endx = sc->wdth / 2 + sc->screenx;
+	if (sc->draw_endx >= conf->width) 
+		sc->draw_endx = conf->width - 1;
+}
+
+void	draw_sprite(t_sc *sc, t_conf *conf, double *zbuff, t_tex tex)
+{
+	int x;
+	int y;
+	int d;
+	int color;
+	
+	x = sc->draw_startx;
+	while (x < sc->draw_endx)
     {
-      spriteOrder[i] = i;
-      spriteDistance[i] = ((game->conf.posX - game->conf.sprite[i].x) * (game->conf.posX - game->conf.sprite[i].x) + (game->conf.posY - game->conf.sprite[i].y) * (game->conf.posY - game->conf.sprite[i].y)); //sqrt not taken, unneeded
-      
-    }
-    
-    sortSprites(spriteOrder, spriteDistance, game->conf.num_sprs);
-    //after sorting the sprites, do the projection and draw them
-    for(int i = 0; i < game->conf.num_sprs; i++)
+		y = sc->draw_starty;
+		sc->texx = (int)256 * (x - (-sc->wdth / 2 + sc->screenx));
+		sc->texx = sc->texx * tex.wdth / sc->wdth / 256;
+		if(sc->transy > 0 && x > 0 && x < conf->width && sc->transy < zbuff[x])
+		{
+			while (y < sc->draw_endy)
+			{
+				d = (y) * 256 - conf->height * 128 + sc->hght * 128;
+				sc->texy = ((d * tex.hght) / sc->hght) / 256;
+				color = tex.addr[tex.wdth * sc->texy + sc->texx];
+				if(color != -0x1000000)
+					my_mlx_pixel_put(&conf->data, x, y, color);
+				y++;
+			}
+		}
+		x++;
+	  }
+}
+
+void	spritecast(t_conf *conf, double *zbuff, t_tex tex)
+{
+	t_sc	sc;
+	int		sprt_ord[conf->num_sprs];
+	double	sprt_dst[conf->num_sprs];
+	int i;
+	
+	i = 0;
+	srt_sprites(conf, sprt_ord, sprt_dst);
+    while (i < conf->num_sprs)
     {
-      double spriteX = game->conf.sprite[spriteOrder[i]].x - game->conf.posX;
-      double spriteY = game->conf.sprite[spriteOrder[i]].y - game->conf.posY;
-      double invDet = 1.0 / (game->conf.planeX * game->conf.dirY - game->conf.dirX * game->conf.planeY); //required for correct matrix multiplication
+		mtrx_trans(conf, &sc, sprt_ord, i);
+		tex_spr(conf, &sc);
+		draw_sprite(&sc, conf, zbuff, tex);
+		i++;
+	}
+}
 
-      double transformX = invDet * (game->conf.dirY * spriteX - game->conf.dirX * spriteY);
-      double transformY = invDet * (-game->conf.planeY * spriteX + game->conf.planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D
-
-      int spriteScreenX = (int)((game->conf.width / 2) * (1 + transformX / transformY));
-
-      //calculate height of the sprite on screen
-      int spriteHeight = abs((int)(game->conf.height / (transformY))); //using 'transformY' instead of the real distance prevents fisheye
-      //calculate lowest and highest pixel to fill in current stripe
-      int drawStartY = -spriteHeight / 2 + game->conf.height / 2;
-      if(drawStartY < 0) drawStartY = 0;
-      int drawEndY = spriteHeight / 2 + game->conf.height / 2;
-      if(drawEndY >= game->conf.height) drawEndY = game->conf.height - 1;
-
-      //calculate width of the sprite
-      int spriteWidth = abs( (int) (game->conf.height / (transformY)));
-      int drawStartX = -spriteWidth / 2 + spriteScreenX;
-      if(drawStartX < 0) drawStartX = 0;
-      int drawEndX = spriteWidth / 2 + spriteScreenX;
-      if(drawEndX >= game->conf.width) drawEndX = game->conf.width - 1;
-
-      //loop through every vertical stripe of the sprite on screen
-      for(int stripe = drawStartX; stripe < drawEndX; stripe++)
-      {
-        int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * tex_width[4] / spriteWidth) / 256;
-        //the conditions in the if are:
-        //1) it's in front of camera plane so you don't see things behind you
-        //2) it's on the screen (left)
-        //3) it's on the screen (right)
-        //4) ZBuffer, with perpendicular distance
-        if(transformY > 0 && stripe > 0 && stripe < game->conf.width && transformY < ZBuffer[stripe])
-        for(int y = drawStartY; y < drawEndY; y++) //for every pixel of the current stripe
-        {
-          int d = (y) * 256 - game->conf.height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
-          int texY = ((d * tex_height[4]) / spriteHeight) / 256;
-          int color = texture[4][tex_width[4] * texY + texX]; //get current color from the texture
-          if(color != -0x1000000)
-            my_mlx_pixel_put(&game->data, stripe, y, color);
-        }
-      }
-      
+void		raycasting(t_conf *conf)
+{
+	double zbuff[conf->width];
+	t_rc rc;
+	t_tex tex[5];
+	int x;
+	
+	x = 0;
+	tex_init(tex, conf);
+	while (x < conf->width)
+    {
+		rc_init(&rc, conf, x);
+		rc_dda(&rc, conf);
+		rc_line(&rc, conf);
+		rc_texx(&rc, conf, tex);
+		rc_texstep(&rc, tex);
+		rc_walls(&rc, conf, tex, x);
+		for (int y = 0; y < rc.drwstrt; y++)
+			my_mlx_pixel_put(&conf->data, x, y, conf->ceil_col);
+		for (int y = rc.drwend; y < conf->height; y++)
+			my_mlx_pixel_put(&conf->data, x, y, conf->floor_col);
+    	zbuff[x] = rc.prpwldist;
+		x++;
     }
+	spritecast(conf, zbuff, tex[4]);
 }
 
 void		check_state(t_game *game)
@@ -360,12 +394,11 @@ int			draw_frame(t_game *game)
   if (!(game->w || game->left || game->right || game->a || game->s || game->d))
     return (0);
 	check_state(game);
-	game->data.img = mlx_new_image(game->conf.mlx, game->conf.width, game->conf.height);
-	game->data.addr =  mlx_get_data_addr(game->data.img, &game->data.bits_per_pixel, &game->data.line_length, &game->data.endian);
-	raycasting(game);
-  //mlx_do_sync(game->mlx);
-	mlx_put_image_to_window(game->conf.mlx, game->win, game->data.img, 0, 0);
-	mlx_destroy_image(game->conf.mlx, game->data.img);
+	game->conf.data.img = mlx_new_image(game->conf.mlx, game->conf.width, game->conf.height);
+	game->conf.data.addr =  mlx_get_data_addr(game->conf.data.img, &game->conf.data.bpp, &game->conf.data.l_ln, &game->conf.data.enan);
+	raycasting(&game->conf);
+	mlx_put_image_to_window(game->conf.mlx, game->win, game->conf.data.img, 0, 0);
+	mlx_destroy_image(game->conf.mlx, game->conf.data.img);
 	return (0);
 }
 
@@ -405,27 +438,41 @@ int key_unpress(int key, t_game *game)
 	return (0);
 }
 
+void  init(t_game *game)
+{
+  game->w = 0;
+	game->s = 0;
+	game->a = 0;
+	game->d = 0;
+  game->left = 0;
+  game->right = 0;
+  game->conf.num_sprs = 0;
+  game->conf.no_path = 0;
+  game->conf.so_path = 0;
+  game->conf.ea_path = 0;
+  game->conf.we_path = 0;
+  game->conf.s_path = 0;
+  game->conf.map = 0;
+  game->conf.sprite = 0;
+}
+
 int main(int argc, char **argv)
 {
   t_game game;
-	game.w = 0;
-	game.s = 0;
-	game.a = 0;
-	game.d = 0;
-  game.left = 0;
-  game.right = 0;
-  game.conf.num_sprs = 0;
-  if (argc != 2)
+
+  init(&game);
+  if (argc > 3)
     return (0);
+  chk_tag(&game.conf, argv[1], ".cub");
 	ft_parsing(argv[1], &game.conf);
 	game.conf.mlx = mlx_init();
 	game.win = mlx_new_window(game.conf.mlx, game.conf.width, game.conf.height, "Cub3d");
   check_state(&game);
-	game.data.img = mlx_new_image(game.conf.mlx, game.conf.width, game.conf.height);
-	game.data.addr =  mlx_get_data_addr(game.data.img, &game.data.bits_per_pixel, &game.data.line_length, &game.data.endian);
-	raycasting(&game);
-	mlx_put_image_to_window(game.conf.mlx, game.win, game.data.img, 0, 0);
-	mlx_destroy_image(game.conf.mlx, game.data.img);
+	game.conf.data.img = mlx_new_image(game.conf.mlx, game.conf.width, game.conf.height);
+	game.conf.data.addr =  mlx_get_data_addr(game.conf.data.img, &game.conf.data.bpp, &game.conf.data.l_ln, &game.conf.data.enan);
+	raycasting(&game.conf);
+	mlx_put_image_to_window(game.conf.mlx, game.win, game.conf.data.img, 0, 0);
+	mlx_destroy_image(game.conf.mlx, game.conf.data.img);
 	mlx_loop_hook(game.conf.mlx, draw_frame, &game);
 	mlx_hook(game.win, 2, (1L<<0), key_press, &game);
 	mlx_hook(game.win, 3, (1L<<1), key_unpress, &game);

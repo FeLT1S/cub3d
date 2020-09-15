@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:34:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/14 18:50:19 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/15 16:02:14 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,4 +71,11 @@ void		list_add(t_conf *conf, t_list *lst, char *line)
 	spr_line = new_line;
 	while ((spr_line = ft_strchr(spr_line++, '2')) && spr_line++)
 		conf->num_sprs++;
+}
+
+void		chk_tag(t_conf *conf, char *s, char *tag)
+{
+	s = ft_strrchr(s, tag[0]);
+	if ((ft_strncmp(s, tag, ft_strlen(s))))
+		conf->err = -1;
 }
