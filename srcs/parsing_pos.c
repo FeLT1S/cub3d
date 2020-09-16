@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:40:14 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/14 18:50:31 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/16 20:45:01 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,17 @@ static void	check_dir_we(int i, int j, t_conf *conf)
 {
 	if (conf->map[i][j] == 'W')
 	{
-		conf->dirX = -1;
-		conf->dirY = 0;
-		conf->planeX = 0;
-		conf->planeY = -1;
+		conf->dirx = -1;
+		conf->diry = 0;
+		conf->plx = 0;
+		conf->ply = -1;
 	}
 	else if (conf->map[i][j] == 'E')
 	{
-		conf->dirX = 1;
-		conf->dirY = 0;
-		conf->planeX = 0;
-		conf->planeY = 1;
+		conf->dirx = 1;
+		conf->diry = 0;
+		conf->plx = 0;
+		conf->ply = 1;
 	}
 }
 
@@ -34,24 +34,24 @@ static void	check_dir_ns(int i, int j, t_conf *conf)
 {
 	if (conf->map[i][j] == 'N')
 	{
-		conf->dirX = 0;
-		conf->dirY = -1;
-		conf->planeX = 1;
-		conf->planeY = 0;
+		conf->dirx = 0;
+		conf->diry = -1;
+		conf->plx = 1;
+		conf->ply = 0;
 	}
 	else if (conf->map[i][j] == 'S')
 	{
-		conf->dirX = 0;
-		conf->dirY = 1;
-		conf->planeX = -1;
-		conf->planeY = 0;
+		conf->dirx = 0;
+		conf->diry = 1;
+		conf->plx = -1;
+		conf->ply = 0;
 	}
 }
 
 void		check_pos(t_conf *conf, int i, int j)
 {
-	conf->posX = j + 0.5;
-	conf->posY = i + 0.5;
+	conf->posx = j + 0.5;
+	conf->posy = i + 0.5;
 	if (conf->num_spawns < 1)
 		conf->num_spawns++;
 	else
