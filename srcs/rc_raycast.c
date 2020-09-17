@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:31:13 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/16 20:46:06 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/17 20:50:06 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,9 +105,7 @@ void		raycasting(t_conf *conf)
 {
 	double	zbuff[conf->width];
 	t_rc	rc;
-	t_tex	tex[5];
 
-	tex_init(tex, conf);
 	rc.x = 0;
 	while (rc.x < conf->width)
 	{
@@ -117,12 +115,12 @@ void		raycasting(t_conf *conf)
 		rc_init(&rc, conf);
 		rc_dda(&rc, conf);
 		rc_line(&rc, conf);
-		rc_texx(&rc, conf, tex);
-		rc_texstep(&rc, tex);
-		rc_walls(&rc, conf, tex);
+		rc_texx(&rc, conf, conf->tex);
+		rc_texstep(&rc, conf->tex);
+		rc_walls(&rc, conf, conf->tex);
 		draw_fl_and_ceil(&rc, conf);
 		zbuff[rc.x] = rc.prpwldist;
 		rc.x++;
 	}
-	spritecast(conf, zbuff, tex[4]);
+	spritecast(conf, zbuff, conf->tex[4]);
 }

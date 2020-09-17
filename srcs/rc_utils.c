@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:34:07 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/16 19:55:29 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/17 18:45:43 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,23 @@ void		my_mlx_pixel_put(t_data *data, int x, int y, int color)
 
 	dst = data->addr + (y * data->l_ln + x * (data->bpp / 8));
 	*(unsigned int*)dst = color;
+}
+
+int			ft_close(t_conf *conf)
+{
+	if (conf->no_path)
+		free(conf->no_path);
+	if (conf->so_path)
+		free(conf->so_path);
+	if (conf->we_path)
+		free(conf->we_path);
+	if (conf->ea_path)
+		free(conf->ea_path);
+	if (conf->s_path)
+		free(conf->s_path);
+	if (conf->map)
+		splitfree(conf->map);
+	if (conf->sprite)
+		free(conf->sprite);
+	exit(0);
 }

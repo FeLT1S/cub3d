@@ -6,68 +6,109 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:44:49 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/16 20:54:42 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/17 18:45:37 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
+void		right(t_game *game)
+{
+	double	olddirx;
+	double	oldplx;
+
+	olddirx = game->conf.dirx;
+	game->conf.dirx = game->conf.dirx * cos(rtspd)
+	- game->conf.diry * sin(rtspd);
+	game->conf.diry = olddirx * sin(rtspd) + game->conf.diry * cos(rtspd);
+	oldplx = game->conf.plx;
+	game->conf.plx = game->conf.plx * cos(rtspd)
+	- game->conf.ply * sin(rtspd);
+	game->conf.ply = oldplx * sin(rtspd) + game->conf.ply * cos(rtspd);
+}
+
+void		left(t_game *game)
+{
+	double	olddirx;
+	double	oldplx;
+
+	olddirx = game->conf.dirx;
+	game->conf.dirx = game->conf.dirx * cos(-rtspd)
+	- game->conf.diry * sin(-rtspd);
+	game->conf.diry = olddirx * sin(-rtspd)
+	+ game->conf.diry * cos(-rtspd);
+	oldplx = game->conf.plx;
+	game->conf.plx = game->conf.plx * cos(-rtspd)
+	- game->conf.ply * sin(-rtspd);
+	game->conf.ply = oldplx * sin(-rtspd) + game->conf.ply * cos(-rtspd);
+}
+
+void		forward_back(t_game *game)
+{
+	double	posx;
+	double	posy;
+
+	if (game->w)
+	{
+		posx = game->conf.posx + game->conf.dirx * mvspd;
+		posy = game->conf.posy + game->conf.diry * mvspd;
+		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.01)] == '0' &&
+		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.01)] == '0')
+			game->conf.posx += game->conf.dirx * mvspd;
+		if (game->conf.map[(int)(posy + 0.01)][(int)(game->conf.posx)] == '0' &&
+		game->conf.map[(int)(posy - 0.01)][(int)(game->conf.posx)] == '0')
+			game->conf.posy += game->conf.diry * mvspd;
+	}
+	if (game->s)
+	{
+		posx = game->conf.posx - game->conf.dirx * mvspd;
+		posy = game->conf.posy - game->conf.diry * mvspd;
+		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.01)] == '0' &&
+		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.01)] == '0')
+			game->conf.posx -= game->conf.dirx * mvspd;
+		if (game->conf.map[(int)(posy + 0.01)][(int)(game->conf.posx)] == '0' &&
+		game->conf.map[(int)(posy - 0.01)][(int)(game->conf.posx)] == '0')
+			game->conf.posy -= game->conf.diry * mvspd;
+	}
+}
+
 void		left_and_right(t_game *game)
 {
-	double olddirx;
-	double oldplx;
-	
-  	if (game->left)
+	double	posx;
+	double	posy;
+
+	if (game->d)
 	{
-      olddirx = game->conf.dirx;
-      game->conf.dirx = game->conf.dirx * cos(-rotSpeed)
-	  - game->conf.diry * sin(-rotSpeed);
-      game->conf.diry = olddirx * sin(-rotSpeed)
-	 + game->conf.diry * cos(-rotSpeed);
-      oldplx = game->conf.plx;
-      game->conf.plx = game->conf.plx * cos(-rotSpeed) - game->conf.ply * sin(-rotSpeed);
-      game->conf.ply = oldplx * sin(-rotSpeed) + game->conf.ply * cos(-rotSpeed);
+		posx = game->conf.posx - game->conf.diry * mvspd;
+		posy = game->conf.posy + game->conf.dirx * mvspd;
+		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.01)] == '0' &&
+		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.01)] == '0')
+			game->conf.posx -= game->conf.diry * mvspd;
+		if (game->conf.map[(int)(posy + 0.01)][(int)(game->conf.posx)] == '0' &&
+		game->conf.map[(int)(posy - 0.01)][(int)(game->conf.posx)] == '0')
+			game->conf.posy += game->conf.dirx * mvspd;
 	}
-	if (game->right)
+	if (game->a)
 	{
-      olddirx = game->conf.dirx;
-      game->conf.dirx = game->conf.dirx * cos(rotSpeed) - game->conf.diry * sin(rotSpeed);
-      game->conf.diry = olddirx * sin(rotSpeed) + game->conf.diry * cos(rotSpeed);
-      oldplx = game->conf.plx;
-      game->conf.plx = game->conf.plx * cos(rotSpeed) - game->conf.ply * sin(rotSpeed);
-      game->conf.ply = oldplx * sin(rotSpeed) + game->conf.ply * cos(rotSpeed);
+		posx = game->conf.posx + game->conf.diry * mvspd;
+		posy = game->conf.posy - game->conf.dirx * mvspd;
+		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.1)] == '0' &&
+		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.1)] == '0')
+			game->conf.posx += game->conf.diry * mvspd;
+		if (game->conf.map[(int)(posy + 0.1)][(int)(game->conf.posx)] == '0' &&
+		game->conf.map[(int)(posy - 0.1)][(int)(game->conf.posx)] == '0')
+			game->conf.posy -= game->conf.dirx * mvspd;
 	}
 }
 
 void		check_state(t_game *game)
 {
-	left_and_right(game);
-	if (game->w)
-	{
-		if (game->conf.map[(int)(game->conf.posy)][(int)(game->conf.posx + game->conf.dirx * moveSpeed)] == '0') 
-			game->conf.posx += game->conf.dirx * moveSpeed;
-		if (game->conf.map[(int)(game->conf.posy + game->conf.diry * moveSpeed)][(int)(game->conf.posx)] == '0') 
-			game->conf.posy += game->conf.diry * moveSpeed;
-	}
-	if (game->s)
-	{
-		if (game->conf.map[(int)game->conf.posy][(int)(game->conf.posx - game->conf.dirx * moveSpeed)] == '0') 
-			game->conf.posx -= game->conf.dirx * moveSpeed;
-		if (game->conf.map[(int)(game->conf.posy - game->conf.diry * moveSpeed)][(int)(game->conf.posx)] == '0') 
-			game->conf.posy -= game->conf.diry * moveSpeed;
-	}
-  	if (game->d)
-	{
-		if (game->conf.map[(int)(game->conf.posy)][(int)(game->conf.posx - game->conf.diry * moveSpeed)] == '0') 
-			game->conf.posx -= game->conf.diry * moveSpeed * 0.5;
-		if (game->conf.map[(int)(game->conf.posy + game->conf.dirx * moveSpeed)][(int)(game->conf.posx)] == '0') 
-			game->conf.posy += game->conf.dirx * moveSpeed * 0.5;
-	}
-    if (game->a)
-	{
-    	if (game->conf.map[(int)(game->conf.posy)][(int)(game->conf.posx + game->conf.diry * moveSpeed)] == '0') 
-			game->conf.posx += game->conf.diry * moveSpeed * 0.5;
-		if (game->conf.map[(int)(game->conf.posy - game->conf.dirx * moveSpeed)][(int)(game->conf.posx)] == '0') 
-			game->conf.posy -= game->conf.dirx * moveSpeed * 0.5;
-	}
+	if (game->left)
+		left(game);
+	if (game->right)
+		right(game);
+	if (game->w || game->s)
+		forward_back(game);
+	if (game->a || game->d)
+		left_and_right(game);
 }

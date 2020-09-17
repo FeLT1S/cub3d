@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:46:09 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/16 20:12:56 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/17 20:10:28 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,26 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define moveSpeed 0.05
-#define rotSpeed 0.03
+#define mvspd 0.06
+#define rtspd 0.04
 
 typedef struct		s_sprite
 {
 	double			x;
 	double			y;
 }               	t_sprite;
+
+typedef struct  	s_tex {
+	void			*img;
+	int				*addr;
+	int				wdth;
+	int				hght;
+	int         	bpp;
+    int         	l_ln;
+    int         	enan;
+	int				x;
+	int				y;
+}					t_tex;
 
 typedef struct  	s_data {
     void        	*img;
@@ -58,6 +70,7 @@ typedef struct		s_conf
 	char			err;
 	t_sprite 		*sprite;
 	t_data			data;
+	t_tex			tex[5];
 }					t_conf;
 
 typedef struct  	s_game {
@@ -115,18 +128,6 @@ typedef struct  	s_sc {
 	int				texy;
 }					t_sc;
 
-typedef struct  	s_tex {
-	void			*img;
-	int				*addr;
-	int				wdth;
-	int				hght;
-	int         	bpp;
-    int         	l_ln;
-    int         	enan;
-	int				x;
-	int				y;
-}					t_tex;
-
 void		ft_parsing(char *file, t_conf *conf);
 void		splitfree(char **out);
 void		ft_error(t_conf *conf, t_list *lst, char *line, char **spl_line);
@@ -147,3 +148,5 @@ void		spritecast(t_conf *conf, double *zbuff, t_tex tex);
 void        my_mlx_pixel_put(t_data *data, int x, int y, int color);
 void    	sort(int *sprite_order, double *spriteDistance, int amount);
 void		check_state(t_game *game);
+int			ft_close(t_conf *conf);
+int			save_bmp(t_game *game);

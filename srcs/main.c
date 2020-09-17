@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/16 20:51:09 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/17 20:27:04 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int			draw_frame(t_game *game)
 int			key_press(int key, t_game *game)
 {
 	if (key == 53)
-		exit(0);
+		ft_close(&game->conf);
 	if (key == kVK_ANSI_W)
 		game->w = 1;
 	if (key == kVK_ANSI_S)
@@ -100,12 +100,15 @@ int			main(int argc, char **argv)
 	game.conf.width, game.conf.height);
 	game.conf.data.addr = mlx_get_data_addr(game.conf.data.img,
 	&game.conf.data.bpp, &game.conf.data.l_ln, &game.conf.data.enan);
+	tex_init(game.conf.tex, &game.conf);
 	raycasting(&game.conf);
+	save_bmp(&game);
 	mlx_put_image_to_window(game.conf.mlx,
 	game.win, game.conf.data.img, 0, 0);
 	mlx_destroy_image(game.conf.mlx, game.conf.data.img);
 	mlx_loop_hook(game.conf.mlx, draw_frame, &game);
 	mlx_hook(game.win, 2, (1L << 0), key_press, &game);
+	mlx_hook(game.win, 17, 0, ft_close, &game.conf);
 	mlx_hook(game.win, 3, (1L << 1), key_unpress, &game);
 	mlx_loop(game.conf.mlx);
 }
