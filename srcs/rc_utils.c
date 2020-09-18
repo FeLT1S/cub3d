@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:34:07 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/17 18:45:43 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/18 17:07:48 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ void		my_mlx_pixel_put(t_data *data, int x, int y, int color)
 
 int			ft_close(t_conf *conf)
 {
+	if (conf->data.img)
+		mlx_destroy_image(conf->mlx, conf->data.img);
 	if (conf->no_path)
 		free(conf->no_path);
 	if (conf->so_path)

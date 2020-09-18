@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:44:49 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/17 18:45:37 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/18 17:21:58 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@ void		right(t_game *game)
 	double	oldplx;
 
 	olddirx = game->conf.dirx;
-	game->conf.dirx = game->conf.dirx * cos(rtspd)
-	- game->conf.diry * sin(rtspd);
-	game->conf.diry = olddirx * sin(rtspd) + game->conf.diry * cos(rtspd);
+	game->conf.dirx = game->conf.dirx * cos(RTSPD)
+	- game->conf.diry * sin(RTSPD);
+	game->conf.diry = olddirx * sin(RTSPD) + game->conf.diry * cos(RTSPD);
 	oldplx = game->conf.plx;
-	game->conf.plx = game->conf.plx * cos(rtspd)
-	- game->conf.ply * sin(rtspd);
-	game->conf.ply = oldplx * sin(rtspd) + game->conf.ply * cos(rtspd);
+	game->conf.plx = game->conf.plx * cos(RTSPD)
+	- game->conf.ply * sin(RTSPD);
+	game->conf.ply = oldplx * sin(RTSPD) + game->conf.ply * cos(RTSPD);
 }
 
 void		left(t_game *game)
@@ -33,14 +33,14 @@ void		left(t_game *game)
 	double	oldplx;
 
 	olddirx = game->conf.dirx;
-	game->conf.dirx = game->conf.dirx * cos(-rtspd)
-	- game->conf.diry * sin(-rtspd);
-	game->conf.diry = olddirx * sin(-rtspd)
-	+ game->conf.diry * cos(-rtspd);
+	game->conf.dirx = game->conf.dirx * cos(-RTSPD)
+	- game->conf.diry * sin(-RTSPD);
+	game->conf.diry = olddirx * sin(-RTSPD)
+	+ game->conf.diry * cos(-RTSPD);
 	oldplx = game->conf.plx;
-	game->conf.plx = game->conf.plx * cos(-rtspd)
-	- game->conf.ply * sin(-rtspd);
-	game->conf.ply = oldplx * sin(-rtspd) + game->conf.ply * cos(-rtspd);
+	game->conf.plx = game->conf.plx * cos(-RTSPD)
+	- game->conf.ply * sin(-RTSPD);
+	game->conf.ply = oldplx * sin(-RTSPD) + game->conf.ply * cos(-RTSPD);
 }
 
 void		forward_back(t_game *game)
@@ -50,25 +50,25 @@ void		forward_back(t_game *game)
 
 	if (game->w)
 	{
-		posx = game->conf.posx + game->conf.dirx * mvspd;
-		posy = game->conf.posy + game->conf.diry * mvspd;
+		posx = game->conf.posx + game->conf.dirx * MVSPD;
+		posy = game->conf.posy + game->conf.diry * MVSPD;
 		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.01)] == '0' &&
 		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.01)] == '0')
-			game->conf.posx += game->conf.dirx * mvspd;
+			game->conf.posx += game->conf.dirx * MVSPD;
 		if (game->conf.map[(int)(posy + 0.01)][(int)(game->conf.posx)] == '0' &&
 		game->conf.map[(int)(posy - 0.01)][(int)(game->conf.posx)] == '0')
-			game->conf.posy += game->conf.diry * mvspd;
+			game->conf.posy += game->conf.diry * MVSPD;
 	}
 	if (game->s)
 	{
-		posx = game->conf.posx - game->conf.dirx * mvspd;
-		posy = game->conf.posy - game->conf.diry * mvspd;
+		posx = game->conf.posx - game->conf.dirx * MVSPD;
+		posy = game->conf.posy - game->conf.diry * MVSPD;
 		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.01)] == '0' &&
 		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.01)] == '0')
-			game->conf.posx -= game->conf.dirx * mvspd;
+			game->conf.posx -= game->conf.dirx * MVSPD;
 		if (game->conf.map[(int)(posy + 0.01)][(int)(game->conf.posx)] == '0' &&
 		game->conf.map[(int)(posy - 0.01)][(int)(game->conf.posx)] == '0')
-			game->conf.posy -= game->conf.diry * mvspd;
+			game->conf.posy -= game->conf.diry * MVSPD;
 	}
 }
 
@@ -79,25 +79,25 @@ void		left_and_right(t_game *game)
 
 	if (game->d)
 	{
-		posx = game->conf.posx - game->conf.diry * mvspd;
-		posy = game->conf.posy + game->conf.dirx * mvspd;
+		posx = game->conf.posx - game->conf.diry * MVSPD;
+		posy = game->conf.posy + game->conf.dirx * MVSPD;
 		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.01)] == '0' &&
 		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.01)] == '0')
-			game->conf.posx -= game->conf.diry * mvspd;
+			game->conf.posx -= game->conf.diry * MVSPD;
 		if (game->conf.map[(int)(posy + 0.01)][(int)(game->conf.posx)] == '0' &&
 		game->conf.map[(int)(posy - 0.01)][(int)(game->conf.posx)] == '0')
-			game->conf.posy += game->conf.dirx * mvspd;
+			game->conf.posy += game->conf.dirx * MVSPD;
 	}
 	if (game->a)
 	{
-		posx = game->conf.posx + game->conf.diry * mvspd;
-		posy = game->conf.posy - game->conf.dirx * mvspd;
+		posx = game->conf.posx + game->conf.diry * MVSPD;
+		posy = game->conf.posy - game->conf.dirx * MVSPD;
 		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.1)] == '0' &&
 		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.1)] == '0')
-			game->conf.posx += game->conf.diry * mvspd;
+			game->conf.posx += game->conf.diry * MVSPD;
 		if (game->conf.map[(int)(posy + 0.1)][(int)(game->conf.posx)] == '0' &&
 		game->conf.map[(int)(posy - 0.1)][(int)(game->conf.posx)] == '0')
-			game->conf.posy -= game->conf.dirx * mvspd;
+			game->conf.posy -= game->conf.dirx * MVSPD;
 	}
 }
 

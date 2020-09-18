@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/17 20:27:04 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/18 17:09:05 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,43 +26,22 @@ int			draw_frame(t_game *game)
 	mlx_put_image_to_window(game->conf.mlx,
 	game->win, game->conf.data.img, 0, 0);
 	mlx_destroy_image(game->conf.mlx, game->conf.data.img);
+	game->conf.data.img = 0;
 	return (0);
 }
 
-int			key_press(int key, t_game *game)
+void		frst_frame(t_game *game)
 {
-	if (key == 53)
-		ft_close(&game->conf);
-	if (key == kVK_ANSI_W)
-		game->w = 1;
-	if (key == kVK_ANSI_S)
-		game->s = 1;
-	if (key == kVK_LeftArrow)
-		game->left = 1;
-	if (key == kVK_RightArrow)
-		game->right = 1;
-	if (key == kVK_ANSI_A)
-		game->a = 1;
-	if (key == kVK_ANSI_D)
-		game->d = 1;
-	return (0);
-}
-
-int			key_unpress(int key, t_game *game)
-{
-	if (key == kVK_ANSI_W)
-		game->w = 0;
-	if (key == kVK_ANSI_S)
-		game->s = 0;
-	if (key == kVK_LeftArrow)
-		game->left = 0;
-	if (key == kVK_RightArrow)
-		game->right = 0;
-	if (key == kVK_ANSI_A)
-		game->a = 0;
-	if (key == kVK_ANSI_D)
-		game->d = 0;
-	return (0);
+	game->win = mlx_new_window(game->conf.mlx,
+	game->conf.width, game->conf.height, "Cub3d");
+	game->conf.data.img = mlx_new_image(game->conf.mlx,
+	game->conf.width, game->conf.height);
+	game->conf.data.addr = mlx_get_data_addr(game->conf.data.img,
+	&game->conf.data.bpp, &game->conf.data.l_ln, &game->conf.data.enan);
+	tex_init(game->conf.tex, &game->conf);
+	raycasting(&game->conf);
+	mlx_put_image_to_window(game->conf.mlx,
+	game->win, game->conf.data.img, 0, 0);
 }
 
 void		init(t_game *game)
@@ -88,24 +67,19 @@ int			main(int argc, char **argv)
 	t_game	game;
 
 	init(&game);
-	if (argc > 3)
+	if (argc > 3 || argc < 2)
 		return (0);
 	chk_tag(&game.conf, argv[1], ".cub");
 	ft_parsing(argv[1], &game.conf);
 	game.conf.mlx = mlx_init();
-	game.win = mlx_new_window(game.conf.mlx,
-	game.conf.width, game.conf.height, "Cub3d");
-	check_state(&game);
-	game.conf.data.img = mlx_new_image(game.conf.mlx,
-	game.conf.width, game.conf.height);
-	game.conf.data.addr = mlx_get_data_addr(game.conf.data.img,
-	&game.conf.data.bpp, &game.conf.data.l_ln, &game.conf.data.enan);
-	tex_init(game.conf.tex, &game.conf);
-	raycasting(&game.conf);
-	save_bmp(&game);
-	mlx_put_image_to_window(game.conf.mlx,
-	game.win, game.conf.data.img, 0, 0);
-	mlx_destroy_image(game.conf.mlx, game.conf.data.img);
+	if (argv[2])
+	{
+		if (!(ft_strncmp(argv[2], "--save", 7)))
+			ft_bitmap(&game.conf);
+		else
+			ft_close(&game.conf);
+	}
+	frst_frame(&game);
 	mlx_loop_hook(game.conf.mlx, draw_frame, &game);
 	mlx_hook(game.win, 2, (1L << 0), key_press, &game);
 	mlx_hook(game.win, 17, 0, ft_close, &game.conf);
