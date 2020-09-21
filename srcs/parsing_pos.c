@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:40:14 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/16 20:45:01 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 16:21:56 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void		check_pos(t_conf *conf, int i, int j)
 	if (conf->num_spawns < 1)
 		conf->num_spawns++;
 	else
-		conf->err = -1;
+		conf->err = 4;
 	if (conf->map[i][j] == 'N' || conf->map[i][j] == 'S')
 		check_dir_ns(i, j, conf);
 	if (conf->map[i][j] == 'W' || conf->map[i][j] == 'E')

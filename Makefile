@@ -1,34 +1,51 @@
-SRCS			=	srcs/main.c\
-					srcs/parsing.c
+SRCS			=	srcs/cub3d.c\
+                	srcs/parsing_main.c\
+					srcs/parsing_clr_and_res.c\
+					srcs/parsing_map.c\
+					srcs/parsing_pos.c\
+					srcs/parsing_utils.c\
+					srcs/rc_raycast.c\
+					srcs/rc_sprites.c\
+					srcs/rc_texture.c\
+					srcs/rc_utils.c\
+					srcs/mv.c\
+					srcs/bmp.c\
+					srcs/buttons.c\
+
 OBJS			= $(SRCS:.c=.o)
 
 CC				= clang
 RM				= rm -f
-CFLAGS			= -O3 -Wall -Wextra -Werror -Iinc/ -Imlx/ -Ilibft/inc/ -g
+CFLAGS			= -O3 -Wall -Wextra -Werror -g -Iinc/ -Imlx/ -Ilibft/inc/
 LIBS			= -Lmlx -lmlx -framework OpenGL -framework AppKit -lm -Llibft -lft
 MLX				= libmlx.dylib
 LIBFT			= libft.a
+NAME			= cub3d
 
-NAME			= cub3D
+all:			$(COMP) $(NAME)
 
-all:			$(NAME)
+$(NAME):		$(LIBFT) $(MLX) $(OBJS) $(COMP)
+				@cp mlx/$(MLX) .
+				clang ${CFLAGS} -o cub3d ${OBJS} ${LIBS}
+				@echo "Done"
 
-$(NAME):		$(LIBFT) $(OBJS) 
-				clang ${CFLAGS} -o ${NAME} ${OBJS} ${LIBS}
-				@mv mlx/$(MLX) .
+$(COMP)
+				
 
 $(LIBFT):		$(MLX)
-				@$(MAKE) -C libft		
+				@make -C libft
 
 $(MLX):
-				@$(MAKE) -C mlx
+				@make -C mlx
 
 clean:
 					$(RM) $(OBJS)
+					@make -C libft clean
+					@make -C mlx clean
 
 fclean:			clean
-					$(RM) $(NAME) $(MLX)
+					$(RM) $(NAME) $(MLX) $(LIBFT) ./mlx/$(MLX)
 
 re:				fclean $(NAME)
 
-.PHONY:			all clean fclean re libft
+.PHONY:			all clean fclean re

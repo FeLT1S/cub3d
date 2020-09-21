@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/31 18:20:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/18 17:09:05 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 18:48:13 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,12 @@ void		init(t_game *game)
 	game->conf.s_path = 0;
 	game->conf.map = 0;
 	game->conf.sprite = 0;
+	game->conf.floor_col = -1;
+	game->conf.ceil_col = -1;
+	game->conf.width = -1;
+	game->conf.height = -1;
+	game->conf.err = 0;
+	game->conf.ymp = 0;
 }
 
 int			main(int argc, char **argv)
@@ -68,7 +74,7 @@ int			main(int argc, char **argv)
 
 	init(&game);
 	if (argc > 3 || argc < 2)
-		return (0);
+		nval(&game.conf, 8);
 	chk_tag(&game.conf, argv[1], ".cub");
 	ft_parsing(argv[1], &game.conf);
 	game.conf.mlx = mlx_init();
@@ -77,7 +83,7 @@ int			main(int argc, char **argv)
 		if (!(ft_strncmp(argv[2], "--save", 7)))
 			ft_bitmap(&game.conf);
 		else
-			ft_close(&game.conf);
+			nval(&game.conf, 8);
 	}
 	frst_frame(&game);
 	mlx_loop_hook(game.conf.mlx, draw_frame, &game);

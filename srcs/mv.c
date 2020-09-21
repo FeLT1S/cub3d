@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:44:49 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/18 17:21:58 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 13:27:40 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,11 +92,11 @@ void		left_and_right(t_game *game)
 	{
 		posx = game->conf.posx + game->conf.diry * MVSPD;
 		posy = game->conf.posy - game->conf.dirx * MVSPD;
-		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.1)] == '0' &&
-		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.1)] == '0')
+		if (game->conf.map[(int)(game->conf.posy)][(int)(posx + 0.01)] == '0' &&
+		game->conf.map[(int)(game->conf.posy)][(int)(posx - 0.01)] == '0')
 			game->conf.posx += game->conf.diry * MVSPD;
-		if (game->conf.map[(int)(posy + 0.1)][(int)(game->conf.posx)] == '0' &&
-		game->conf.map[(int)(posy - 0.1)][(int)(game->conf.posx)] == '0')
+		if (game->conf.map[(int)(posy + 0.01)][(int)(game->conf.posx)] == '0' &&
+		game->conf.map[(int)(posy - 0.01)][(int)(game->conf.posx)] == '0')
 			game->conf.posy -= game->conf.dirx * MVSPD;
 	}
 }

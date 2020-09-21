@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:34:30 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/15 21:49:32 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 18:41:26 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ void		splitfree(char **out)
 
 void		ft_error(t_conf *conf, t_list *lst, char *line, char **spl_line)
 {
-	write(2, "MAP FILE ERROR\n", 16);
+	write(2, "Error\n", 7);
+	code_error(conf);
 	if (conf->no_path)
 		free(conf->no_path);
 	if (conf->so_path)
@@ -76,6 +77,6 @@ void		list_add(t_conf *conf, t_list *lst, char *line)
 void		chk_tag(t_conf *conf, char *s, char *tag)
 {
 	s = ft_strrchr(s, tag[0]);
-	if ((ft_strncmp(s, tag, ft_strlen(s))))
-		conf->err = -1;
+	if (!s || (ft_strncmp(s, tag, ft_strlen(s))))
+		conf->err = 6;
 }

@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:32:45 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/16 20:14:51 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 18:34:08 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,19 +98,19 @@ void		tex_init(t_tex *tex, t_conf *conf)
 {
 	if (!(tex[0].img = mlx_xpm_file_to_image(conf->mlx,
 	conf->we_path, &tex[0].wdth, &tex[0].hght)))
-		ft_error(conf, 0, 0, 0);
+		nval(conf, 5);
 	if (!(tex[1].img = mlx_xpm_file_to_image(conf->mlx,
 	conf->ea_path, &tex[1].wdth, &tex[1].hght)))
-		ft_error(conf, 0, 0, 0);
+		nval(conf, 5);
 	if (!(tex[2].img = mlx_xpm_file_to_image(conf->mlx,
 	conf->no_path, &tex[2].wdth, &tex[2].hght)))
-		ft_error(conf, 0, 0, 0);
+		nval(conf, 5);
 	if (!(tex[3].img = mlx_xpm_file_to_image(conf->mlx,
 	conf->so_path, &tex[3].wdth, &tex[3].hght)))
-		ft_error(conf, 0, 0, 0);
+		nval(conf, 5);
 	if (!(tex[4].img = mlx_xpm_file_to_image(conf->mlx,
 	conf->s_path, &tex[4].wdth, &tex[4].hght)))
-		ft_error(conf, 0, 0, 0);
+		nval(conf, 5);
 	tex[0].addr = (int*)mlx_get_data_addr(tex[0].img,
 	&tex[0].bpp, &tex[0].l_ln, &tex[0].enan);
 	tex[1].addr = (int*)mlx_get_data_addr(tex[1].img,

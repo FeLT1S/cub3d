@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:46:09 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/18 17:20:29 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 19:35:50 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ typedef struct		s_conf
 	int				num_sprs;
 	int				num_spawns;
 	char			err;
+	char			ymp;
 	t_sprite		*sprite;
 	t_data			data;
 	t_tex			tex[5];
@@ -135,7 +136,7 @@ void				splitfree(char **out);
 void				ft_error(t_conf *conf, t_list *lst,
 					char *line, char **spl_line);
 char				*check_strdup(const char *s, t_conf *conf);
-int					ft_colors(char *col_line, t_conf *conf);
+int					ft_colors(char **col_line, t_conf *conf, int *color);
 void				list_add(t_conf *conf, t_list *lst, char *line);
 void				frame_res(char **spl_line, t_conf *conf);
 void				check_pos(t_conf *conf, int i, int j);
@@ -156,5 +157,7 @@ int					ft_close(t_conf *conf);
 void				ft_bitmap(t_conf *cfg);
 int					key_unpress(int key, t_game *game);
 int					key_press(int key, t_game *game);
+void				nval(t_conf *conf, int err);
+void				code_error(t_conf *conf);
 
 #endif

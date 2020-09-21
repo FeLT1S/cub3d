@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:37:32 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/14 18:51:36 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 19:26:45 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,17 @@
 static void	check_valid(int i, int j, t_conf *conf, int *spr)
 {
 	if (!(ft_memchr("NSWE 012", conf->map[i][j], 9)))
-		conf->err = -1;
+		conf->err = 4;
 	if (ft_memchr("NSWE", conf->map[i][j], 5))
 		check_pos(conf, i, j);
 	if (conf->map[i][j] == '0')
 	{
 		if (conf->map[i + 1][j] == ' ' || conf->map[i][j + 1] == ' ' ||
 		conf->map[i - 1][j] == ' ' || conf->map[i][j - 1] == ' ')
-			conf->err = -1;
+			conf->err = 4;
+		if (!(conf->map[i + 1][j]) || !(conf->map[i - 1][j]) ||
+		!(conf->map[i][j - 1]) || !(conf->map[i][j - 1]))
+			conf->err = 4;
 	}
 	if (conf->map[i][j] == '2')
 	{
@@ -40,7 +43,7 @@ static void	check_border_map(int i, t_conf *conf)
 	while (conf->map[0][j])
 	{
 		if (!(ft_memchr("1 ", conf->map[i][j], 3)))
-			conf->err = -1;
+			conf->err = 4;
 		j++;
 	}
 }
@@ -59,16 +62,16 @@ static int	ft_checkmap(t_conf *conf)
 	{
 		j = 1;
 		if (!(ft_memchr("1 ", conf->map[i][0], 3)))
-			return (conf->err = -1);
+			return (conf->err = 4);
 		while (conf->map[i][j + 1])
 			check_valid(i, j++, conf, &spr);
 		if (!(ft_memchr("1 ", conf->map[i][j], 3)))
-			return (conf->err = -1);
+			return (conf->err = 4);
 		i++;
 	}
 	check_border_map(i, conf);
 	if (!conf->num_spawns)
-		conf->err = -1;
+		conf->err = 4;
 	return (0);
 }
 
@@ -78,7 +81,7 @@ void		ft_map(t_list *lst, t_conf *conf, char *line, char **spl_line)
 	int		num_str;
 	t_list	*fst_lst;
 
-	if (conf->err == -1)
+	if (conf->err)
 		ft_error(conf, lst, line, spl_line);
 	fst_lst = lst;
 	conf->num_spawns = 0;
@@ -86,7 +89,7 @@ void		ft_map(t_list *lst, t_conf *conf, char *line, char **spl_line)
 	i = 0;
 	num_str = ft_lstsize(lst);
 	if (!(conf->map = (char**)malloc(sizeof(int*) * (num_str + 1))))
-		conf->err = -1;
+		conf->err = 4;
 	conf->sprite = (t_sprite*)malloc(sizeof(t_sprite) * (conf->num_sprs + 1));
 	while (i < num_str)
 	{
@@ -96,7 +99,7 @@ void		ft_map(t_list *lst, t_conf *conf, char *line, char **spl_line)
 	}
 	conf->map[num_str + 1] = NULL;
 	ft_checkmap(conf);
-	if (conf->err == -1)
+	if (conf->err)
 		ft_error(conf, fst_lst, line, spl_line);
 	ft_lstclear(&fst_lst, free);
 }

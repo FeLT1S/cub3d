@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:34:07 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/18 17:07:48 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 18:48:29 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,34 @@ void		my_mlx_pixel_put(t_data *data, int x, int y, int color)
 
 	dst = data->addr + (y * data->l_ln + x * (data->bpp / 8));
 	*(unsigned int*)dst = color;
+}
+
+void		code_error(t_conf *conf)
+{
+	if (conf->err == 1)
+		write(2, "Not valid resolution\n", 22);
+	else if (conf->err == 2)
+		write(2, "Not valid color\n", 17);
+	else if (conf->err == 3)
+		write(2, "Not valid path\n", 16);
+	else if (conf->err == 4)
+		write(2, "Not valid map\n", 15);
+	else if (conf->err == 5)
+		write(2, "Not valid texture\n", 19);
+	else if (conf->err == 6)
+		write(2, "Not valid extension\n", 21);
+	else if (conf->err == 7)
+		write(2, "Cannot open file\n", 17);
+	else if (conf->err == 8)
+		write(2, "Program flag error\n", 20);
+	else
+		write(2, "Other error\n", 13);
+}
+
+void		nval(t_conf *conf, int err)
+{
+	conf->err = err;
+	ft_error(conf, 0, 0, 0);
 }
 
 int			ft_close(t_conf *conf)

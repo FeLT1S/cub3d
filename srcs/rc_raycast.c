@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:31:13 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/17 20:50:06 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/21 13:35:46 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,11 @@ void		draw_fl_and_ceil(t_rc *rc, t_conf *conf)
 
 void		raycasting(t_conf *conf)
 {
-	double	zbuff[conf->width];
+	double	*zbuff;
 	t_rc	rc;
 
 	rc.x = 0;
+	zbuff = (double*)malloc(sizeof(double) * conf->width);
 	while (rc.x < conf->width)
 	{
 		rc.camerax = 2 * rc.x / (double)conf->width - 1;
@@ -123,4 +124,5 @@ void		raycasting(t_conf *conf)
 		rc.x++;
 	}
 	spritecast(conf, zbuff, conf->tex[4]);
+	free(zbuff);
 }
