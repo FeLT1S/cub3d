@@ -19,20 +19,17 @@ RM				= rm -f
 CFLAGS			= -O3 -Wall -Wextra -Werror -g -Iinc/ -Imlx/ -Ilibft/inc/
 LIBS			= -Lmlx -lmlx -framework OpenGL -framework AppKit -lm -Llibft -lft
 MLX				= libmlx.dylib
-LIBFT			= libft.a
+LIBFT			= ./libft/libft.a
 NAME			= cub3d
 
-all:			$(COMP) $(NAME)
+all:			$(NAME)
 
-$(NAME):		$(LIBFT) $(MLX) $(OBJS) $(COMP)
+$(NAME):		$(LIBFT) $(MLX) $(OBJS)
 				@cp mlx/$(MLX) .
 				clang ${CFLAGS} -o cub3d ${OBJS} ${LIBS}
 				@echo "Done"
 
-$(COMP)
-				
-
-$(LIBFT):		$(MLX)
+$(LIBFT):
 				@make -C libft
 
 $(MLX):
@@ -40,11 +37,11 @@ $(MLX):
 
 clean:
 					$(RM) $(OBJS)
-					@make -C libft clean
-					@make -C mlx clean
+					@make clean -C libft
 
 fclean:			clean
-					$(RM) $(NAME) $(MLX) $(LIBFT) ./mlx/$(MLX)
+					$(RM) $(NAME) $(MLX) $(LIBFT)
+					@make clean -C mlx 
 
 re:				fclean $(NAME)
 
