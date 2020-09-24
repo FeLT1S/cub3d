@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:29:11 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/21 19:35:32 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/24 18:18:14 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,10 @@ void		ft_flags(char **spl_line, char *line, t_list *lst, t_conf *conf)
 		ft_colors(spl_line, conf, &conf->floor_col);
 	else if (!(ft_strncmp("C", spl_line[0], 2)))
 		ft_colors(spl_line, conf, &conf->ceil_col);
-	else
-	{
+	else if (!(ft_strncmp("1", spl_line[0], 1)) && (conf->ymp = 1))
 		list_add(conf, lst, line);
-		conf->ymp = 1;
-	}
+	else
+		return ;
 }
 
 void		read_line(char ***spl_line, char **line, t_conf *conf, t_list *lst)

@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:35:58 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/21 19:37:37 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/24 15:12:09 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ static int	check_colors(int shift, char *s_col)
 	int		i;
 
 	i = 0;
+	if (!s_col)
+		return (-1);
 	while (s_col[i])
 	{
 		if (!(ft_memchr("0123456789", s_col[i], 11)))

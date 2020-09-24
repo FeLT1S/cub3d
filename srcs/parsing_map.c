@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:37:32 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/21 19:26:45 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/24 18:07:05 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 static void	check_valid(int i, int j, t_conf *conf, int *spr)
 {
 	if (!(ft_memchr("NSWE 012", conf->map[i][j], 9)))
-		conf->err = 4;
+		conf->err = 1;
 	if (ft_memchr("NSWE", conf->map[i][j], 5))
 		check_pos(conf, i, j);
 	if (conf->map[i][j] == '0')
@@ -46,6 +46,10 @@ static void	check_border_map(int i, t_conf *conf)
 			conf->err = 4;
 		j++;
 	}
+	if (conf->height == -1 || conf->width == -1)
+		conf->err = 1;
+	if (conf->floor_col == -1 || conf->ceil_col == -1)
+		conf->err = 2;
 }
 
 static int	ft_checkmap(t_conf *conf)
