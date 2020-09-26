@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:29:11 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/24 18:18:14 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/26 16:52:20 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,16 +27,29 @@ void		check_path(t_conf *conf, char **line, char **s)
 		conf->err = -1;
 }
 
-void		chk_empty(t_conf *conf)
+void		chk_empty(t_conf *conf, t_list *lst)
 {
+	char	*str;
+	int		i;
+
+	str = ft_lstlast(lst)->content;
+	i = 0;
 	if (conf->ymp == 1)
-		conf->err = 4;
+	{
+		while (str[i])
+		{
+			if (!(ft_memchr("1 ", str[i], 3)) && !(ft_strncmp("1", str, 2)))
+				conf->err = 4;
+			i++;
+		}
+		list_add(conf, lst, "11");
+	}
 }
 
 void		ft_flags(char **spl_line, char *line, t_list *lst, t_conf *conf)
 {
 	if (spl_line[0] == NULL)
-		chk_empty(conf);
+		chk_empty(conf, lst);
 	else if (!(ft_strncmp("R", spl_line[0], 2)))
 		frame_res(spl_line, conf);
 	else if (!(ft_strncmp("NO", spl_line[0], 3)))
@@ -53,10 +66,11 @@ void		ft_flags(char **spl_line, char *line, t_list *lst, t_conf *conf)
 		ft_colors(spl_line, conf, &conf->floor_col);
 	else if (!(ft_strncmp("C", spl_line[0], 2)))
 		ft_colors(spl_line, conf, &conf->ceil_col);
-	else if (!(ft_strncmp("1", spl_line[0], 1)) && (conf->ymp = 1))
+	else if ((!(ft_strncmp("0", spl_line[0], 1)) ||
+	!(ft_strncmp("1", spl_line[0], 1))) && (conf->ymp = 1))
 		list_add(conf, lst, line);
 	else
-		return ;
+		conf->err = 9;
 }
 
 void		read_line(char ***spl_line, char **line, t_conf *conf, t_list *lst)

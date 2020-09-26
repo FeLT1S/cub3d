@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:46:09 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/21 19:35:50 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/25 16:36:58 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 # include "../mlx/mlx.h"
 # include "keys.h"
 # include "libft.h"
-# include <stdio.h>
 # include <math.h>
 # include <stdlib.h>
 

@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:37:32 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/24 18:07:05 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/25 17:24:45 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static void	check_valid(int i, int j, t_conf *conf, int *spr)
 		conf->map[i - 1][j] == ' ' || conf->map[i][j - 1] == ' ')
 			conf->err = 4;
 		if (!(conf->map[i + 1][j]) || !(conf->map[i - 1][j]) ||
-		!(conf->map[i][j - 1]) || !(conf->map[i][j - 1]))
+		!(conf->map[i][j + 1]) || !(conf->map[i][j - 1]))
 			conf->err = 4;
 	}
 	if (conf->map[i][j] == '2')
@@ -40,7 +40,7 @@ static void	check_border_map(int i, t_conf *conf)
 	int		j;
 
 	j = 0;
-	while (conf->map[0][j])
+	while ((conf->map[i]) && conf->map[i][j])
 	{
 		if (!(ft_memchr("1 ", conf->map[i][j], 3)))
 			conf->err = 4;

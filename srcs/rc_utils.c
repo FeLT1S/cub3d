@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:34:07 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/24 16:47:57 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/26 16:52:51 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void		code_error(t_conf *conf)
 	else if (conf->err == 8)
 		write(2, "Program flag error\n", 20);
 	else if (conf->err == 9)
-		write(2, "File .cub has not col or res param\n", 36);
+		write(2, "File has bad symbols\n", 22);
 	else
 		write(2, "Other error\n", 13);
 }
