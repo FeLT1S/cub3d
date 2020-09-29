@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:35:58 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/24 15:12:09 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/29 19:50:01 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,11 +104,11 @@ void		frame_res(char **spl_line, t_conf *conf)
 	conf->width = chk_res(spl_line[1], conf);
 	if (conf->width > width)
 		conf->width = width;
-	if (conf->width < 1)
+	if (conf->width < 100)
 		conf->err = 1;
 	conf->height = chk_res(spl_line[2], conf);
 	if (conf->height > height)
 		conf->height = height;
-	if (conf->height < 1)
+	if (conf->height < 100)
 		conf->err = 1;
 }

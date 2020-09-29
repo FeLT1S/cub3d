@@ -6,59 +6,92 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/17 19:17:14 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/26 16:49:47 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/29 20:49:34 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 #include <fcntl.h>
 
-void scrin_bmp2(t_conf *conf, int32_t num, char *bmp, uint32_t size)
+int					my_get_color(t_conf *data, int x, int y)
 {
-	num = 1;
-	ft_memcpy(&bmp[26], &num, 2);
-	ft_memcpy(&bmp[28], &conf->data.bpp, 2);
-	ft_memcpy(&bmp[54], conf->data.addr, (size - 54));
-	num = open("screenshot.bmp", O_CREAT | O_WRONLY | O_TRUNC, 0644);
-	(write(num, bmp, size));
-	free(bmp);
-	close(num);
-	exit(0);
+	char			*dst;
+
+	dst = data->data.addr + (y * data->data.l_ln
+	+ x * (data->data.bpp / 8));
+	return (*(unsigned int*)dst);
 }
 
-void scrin_bmp(t_conf *cfg)
+static void			init_heder(unsigned char *mas_heder, int size, t_conf *cfg)
 {
-	char *bmp;
-	int32_t num;
-	uint32_t size;
-
-	size = cfg->height * cfg->width *
-	(cfg->data.bpp >> 3) + 54;
-	if (!(bmp = (char*)malloc(size)))
-		ft_error(cfg, 0, 0, 0);
-	ft_bzero(bmp, size);
-	ft_memcpy(&bmp[0], "BM", 2);
-	ft_memcpy(&bmp[2], &size, 4);
-	num = 54;
-	ft_memcpy(&bmp[10], &num, 4);
-	num = 40;
-	ft_memcpy(&bmp[14], &num, 4);
-	num = cfg->width;
-	ft_memcpy(&bmp[18], &num, 4);
-	num = -(cfg->height);
-	ft_memcpy(&bmp[22], &num, 4);
-	scrin_bmp2(cfg, num, bmp, size);
+	mas_heder[0] = (unsigned char)'B';
+	mas_heder[1] = (unsigned char)'M';
+	mas_heder[2] = (unsigned char)size;
+	mas_heder[3] = (unsigned char)(size >> 8);
+	mas_heder[4] = (unsigned char)(size >> 16);
+	mas_heder[5] = (unsigned char)(size >> 24);
+	mas_heder[10] = (unsigned char)54;
+	mas_heder[14] = (unsigned char)40;
+	mas_heder[18] = (unsigned char)cfg->width;
+	mas_heder[19] = (unsigned char)(cfg->width >> 8);
+	mas_heder[20] = (unsigned char)(cfg->width >> 16);
+	mas_heder[21] = (unsigned char)(cfg->width >> 24);
+	mas_heder[22] = (unsigned char)cfg->height;
+	mas_heder[23] = (unsigned char)(cfg->height >> 8);
+	mas_heder[24] = (unsigned char)(cfg->height >> 16);
+	mas_heder[25] = (unsigned char)(cfg->height >> 24);
+	mas_heder[26] = (unsigned char)1;
+	mas_heder[28] = (unsigned char)24;
 }
-void
-	ft_bitmap(t_conf *cfg)
+
+static void			put_img_skrin(t_conf *cfg, int fd)
 {
-	while (cfg->width % 64 != 0)
-		cfg->width--;
+	int				color;
+	int				x;
+	int				y;
+	int				size_x;
+
+	color = 0;
+	x = 0;
+	y = cfg->height - 1;
+	size_x = cfg->width;
+	while (y >= 0)
+	{
+		while (x < size_x)
+		{
+			color = my_get_color(cfg, x, y);
+			write(fd, &color, 3);
+			x++;
+		}
+		y--;
+		x = 0;
+	}
+}
+
+void				ft_bitmap(t_conf *cfg)
+{
+	int				fd;
+	unsigned char	mas_heder[54];
+	int				count;
+	int				size;
+
+	if (cfg->width % 4)
+		cfg->width = cfg->width - (cfg->width % 4);
 	cfg->data.img = mlx_new_image(cfg->mlx,
 	cfg->width, cfg->height);
 	cfg->data.addr = mlx_get_data_addr(cfg->data.img,
 	&cfg->data.bpp, &cfg->data.l_ln, &cfg->data.enan);
 	tex_init(cfg->tex, cfg);
 	raycasting(cfg);
-	scrin_bmp(cfg);
+	size = cfg->width * cfg->height + 54;
+	count = 0;
+	if (!(fd = open("./screenshot.bmp", O_RDWR | O_CREAT, 0666)))
+		ft_error(cfg, 0, 0, 0);
+	while (count < 54)
+		mas_heder[count++] = (unsigned char)0;
+	init_heder(mas_heder, size, cfg);
+	write(fd, mas_heder, 54);
+	put_img_skrin(cfg, fd);
+	close(fd);
+	exit(0);
 }

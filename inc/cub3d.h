@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:46:09 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/25 16:36:58 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/29 20:51:43 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef struct		s_conf
 	void			*mlx;
 	int				height;
 	int				width;
+	int				mp_size;
 	char			*no_path;
 	char			*so_path;
 	char			*we_path;

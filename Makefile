@@ -12,6 +12,9 @@ SRCS			=	srcs/cub3d.c\
 					srcs/bmp.c\
 					srcs/buttons.c\
 
+INCS			=	inc/cub3d.h\
+					inc/keys.h
+
 OBJS			= $(SRCS:.c=.o)
 
 CC				= clang
@@ -24,7 +27,7 @@ NAME			= cub3d
 
 all:			$(NAME)
 
-$(NAME):		$(LIBFT) $(MLX) $(OBJS)
+$(NAME):		$(LIBFT) $(MLX) $(OBJS) $(INCS)
 				@cp mlx/$(MLX) .
 				clang ${CFLAGS} -o cub3d ${OBJS} ${LIBS}
 				@echo "Done"

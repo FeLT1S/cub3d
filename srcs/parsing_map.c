@@ -6,7 +6,7 @@
 /*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/14 18:37:32 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/25 17:24:45 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/09/29 20:56:25 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ static void	check_valid(int i, int j, t_conf *conf, int *spr)
 		if (conf->map[i + 1][j] == ' ' || conf->map[i][j + 1] == ' ' ||
 		conf->map[i - 1][j] == ' ' || conf->map[i][j - 1] == ' ')
 			conf->err = 4;
-		if (!(conf->map[i + 1][j]) || !(conf->map[i - 1][j]) ||
-		!(conf->map[i][j + 1]) || !(conf->map[i][j - 1]))
+		if ((ft_strlen(conf->map[i - 1]) + 1 < ft_strlen(conf->map[i])) ||
+		(ft_strlen(conf->map[i + 1]) + 1 < ft_strlen(conf->map[i])))
 			conf->err = 4;
 	}
 	if (conf->map[i][j] == '2')
@@ -62,7 +62,7 @@ static int	ft_checkmap(t_conf *conf)
 	j = 1;
 	spr = 0;
 	check_border_map(0, conf);
-	while (conf->map[i + 1])
+	while (i < conf->mp_size - 1)
 	{
 		j = 1;
 		if (!(ft_memchr("1 ", conf->map[i][0], 3)))
@@ -73,7 +73,7 @@ static int	ft_checkmap(t_conf *conf)
 			return (conf->err = 4);
 		i++;
 	}
-	check_border_map(i, conf);
+	check_border_map(conf->mp_size - 1, conf);
 	if (!conf->num_spawns)
 		conf->err = 4;
 	return (0);
@@ -82,7 +82,6 @@ static int	ft_checkmap(t_conf *conf)
 void		ft_map(t_list *lst, t_conf *conf, char *line, char **spl_line)
 {
 	int		i;
-	int		num_str;
 	t_list	*fst_lst;
 
 	if (conf->err)
@@ -91,17 +90,16 @@ void		ft_map(t_list *lst, t_conf *conf, char *line, char **spl_line)
 	conf->num_spawns = 0;
 	lst = lst->next;
 	i = 0;
-	num_str = ft_lstsize(lst);
-	if (!(conf->map = (char**)malloc(sizeof(int*) * (num_str + 1))))
+	conf->mp_size = ft_lstsize(lst);
+	if (!(conf->map = (char**)malloc(sizeof(int*) * (conf->mp_size + 1))))
 		conf->err = 4;
+	conf->map[conf->mp_size] = NULL;
 	conf->sprite = (t_sprite*)malloc(sizeof(t_sprite) * (conf->num_sprs + 1));
-	while (i < num_str)
+	while (i < conf->mp_size)
 	{
-		conf->map[i] = check_strdup((char*)lst->content, conf);
+		conf->map[i++] = check_strdup((char*)lst->content, conf);
 		lst = lst->next;
-		i++;
 	}
-	conf->map[num_str + 1] = NULL;
 	ft_checkmap(conf);
 	if (conf->err)
 		ft_error(conf, fst_lst, line, spl_line);
