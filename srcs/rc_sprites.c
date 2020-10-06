@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   rc_sprites.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
+/*   By: jiandre <jiandre@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/09/16 19:33:26 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/17 18:42:39 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/10/06 15:39:45 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,11 +87,15 @@ void		draw_sprite(t_sc *sc, t_conf *conf, double *zbuff, t_tex tex)
 void		spritecast(t_conf *conf, double *zbuff, t_tex tex)
 {
 	t_sc	sc;
-	int		sprt_ord[conf->num_sprs];
-	double	sprt_dst[conf->num_sprs];
+	int		*sprt_ord;
+	double	*sprt_dst;
 	int		i;
 
 	i = 0;
+	if (!(sprt_ord = malloc(sizeof(int) * conf->num_sprs)))
+		ft_error(conf, 0, 0, 0);
+	if (!(sprt_dst = malloc(sizeof(double) * conf->num_sprs)))
+		ft_error(conf, 0, 0, 0);
 	srt_sprites(conf, sprt_ord, sprt_dst);
 	while (i < conf->num_sprs)
 	{
@@ -100,4 +104,6 @@ void		spritecast(t_conf *conf, double *zbuff, t_tex tex)
 		draw_sprite(&sc, conf, zbuff, tex);
 		i++;
 	}
+	free(sprt_ord);
+	free(sprt_dst);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing_main.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jiandre <kostbg1@gmail.com>                +#+  +:+       +#+        */
+/*   By: jiandre <jiandre@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/27 16:29:11 by jiandre           #+#    #+#             */
-/*   Updated: 2020/09/29 20:40:38 by jiandre          ###   ########.fr       */
+/*   Updated: 2020/10/06 15:37:26 by jiandre          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,11 @@ void		check_path(t_conf *conf, char **line, char **s)
 {
 	if (line[2])
 		conf->err = 3;
-	chk_tag(conf, line[1], ".xpm");
+	if (line[1])
+		chk_tag(conf, line[1], ".xpm");
 	if (conf->ymp == 1)
 		conf->err = 6;
-	if (!*s)
+	if (!*s && line[1])
 		*s = check_strdup(line[1], conf);
 	else
 		conf->err = -1;
@@ -42,7 +43,7 @@ void		chk_empty(t_conf *conf, t_list *lst)
 				conf->err = 4;
 			i++;
 		}
-		list_add(conf, lst, "11");
+		list_add(conf, lst, "  ");
 	}
 }
 
